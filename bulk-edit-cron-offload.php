@@ -10,4 +10,8 @@
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
+// Plugin dependencies
+require __DIR__ . '/includes/abstract-class-singleton.php';
+
+// Plugin functionality
 require __DIR__ . '/includes/class-main.php';
