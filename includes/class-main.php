@@ -105,7 +105,7 @@ class Main extends Singleton {
 			$this->tax_input = $_REQUEST['tax_input'];
 		}
 
-		if ( isset( $_REQUEST['post_author'] ) && -1 === (int) $_REQUEST['post_author'] ) {
+		if ( isset( $_REQUEST['post_author'] ) && -1 !== (int) $_REQUEST['post_author'] ) {
 			$this->post_author = $_REQUEST['post_author'];
 		}
 
@@ -132,6 +132,13 @@ class Main extends Singleton {
 		// Stop Core from processing bulk request
 		unset( $_REQUEST['action'] );
 		unset( $_REQUEST['action2'] );
+	}
+
+	/**
+	 * Get data for this bulk request
+	 */
+	private function get_vars() {
+		return get_object_vars( $this );
 	}
 }
 
