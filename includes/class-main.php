@@ -15,7 +15,7 @@ class Main {
 	 */
 	public static function intercept() {
 		// Nothing to do
-		if ( ! isset( $_REQUEST['action'] ) ) {
+		if ( ! isset( $_REQUEST['action'] ) && ! isset( $_REQUEST['action2'] ) && ! isset( $_REQUEST['delete_all'] ) ) {
 			return;
 		}
 
@@ -52,8 +52,13 @@ class Main {
 	private static function capture_vars() {
 		$vars = new \stdClass();
 
-		// Capture request variables
-		$vars->action = $_REQUEST['action'];
+		if ( isset( $_REQUEST['delete_all'] ) ) {
+			$vars->action = 'delete_all';
+		} elseif ( isset( $_REQUEST['action'] ) && -1 !== (int) $_REQUEST['action'] ) {
+			$vars->action = (int) $_REQUEST['action'];
+		} elseif ( isset( $_REQUEST['action2'] ) && -1 !== (int) $_REQUEST['action2'] ) {
+			$vars->action = (int) $_REQUEST['action2'];
+		}
 
 		if ( isset( $_REQUEST['post'] ) && is_array( $_REQUEST['post'] ) ) {
 			$vars->posts = array_map( 'absint', $_REQUEST['post'] );
@@ -90,6 +95,7 @@ class Main {
 		// Stop Core from processing bulk request
 		unset( $_REQUEST['action'] );
 		unset( $_REQUEST['action2'] );
+		unset( $_REQUEST['delete_all'] );
 
 		// Return captured variables
 		return $vars;
