@@ -25,6 +25,7 @@ class Main {
 		// Now what?
 		switch ( $vars->action ) {
 			case 'delete_all' :
+				Delete_All::process( $vars );
 				break;
 
 			case 'trash' :
