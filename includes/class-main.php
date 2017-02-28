@@ -6,7 +6,7 @@ class Main {
 	/**
 	 * Register action
 	 */
-	public static function init() {
+	public static function load() {
 		add_action( 'load-edit.php', array( __CLASS__, 'intercept' ) );
 	}
 
@@ -96,4 +96,4 @@ class Main {
 	}
 }
 
-Main::init();
+Main::load();
