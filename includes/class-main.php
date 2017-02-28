@@ -62,7 +62,7 @@ class Main {
 		}
 
 		if ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) {
-			$vars->posts_type = $_REQUEST['post_type'];
+			$vars->post_type = $_REQUEST['post_type'];
 		}
 
 		if ( isset( $_REQUEST['post'] ) && is_array( $_REQUEST['post'] ) ) {
