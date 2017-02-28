@@ -60,6 +60,10 @@ class Main {
 			$vars->action = (int) $_REQUEST['action2'];
 		}
 
+		if ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) {
+			$vars->posts_type = $_REQUEST['post_type'];
+		}
+
 		if ( isset( $_REQUEST['post'] ) && is_array( $_REQUEST['post'] ) ) {
 			$vars->posts = array_map( 'absint', $_REQUEST['post'] );
 		}
