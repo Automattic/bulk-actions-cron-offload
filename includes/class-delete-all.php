@@ -29,10 +29,12 @@ class Delete_All {
 
 		if ( $existing_event_ts ) {
 			// TODO: Notice that event already scheduled
+			self::redirect_error();
 		} else {
 			wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
 
 			// TODO: Notice that event scheduled
+			self::redirect_success();
 		}
 	}
 
@@ -85,6 +87,22 @@ class Delete_All {
 			// TODO: What to do here?
 			return false;
 		}
+	}
+
+	/**
+	 *
+	 */
+	public static function redirect_error() {
+		// TODO: implement
+		self::redirect_success();
+	}
+
+	/**
+	 *
+	 */
+	public static function redirect_success() {
+		wp_redirect( remove_query_arg( array( '_wp_http_referer', '_wpnonce', 'delete_all', 'delete_all2', ), wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+		exit;
 	}
 }
 
