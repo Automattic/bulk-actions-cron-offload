@@ -63,7 +63,15 @@ class Main {
 	 * Determine if current request is a bulk edit
 	 */
 	private static function should_intercept_request() {
-		return isset( $_REQUEST['action'] ) || isset( $_REQUEST['action2'] ) || isset( $_REQUEST['delete_all'] );
+		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
+			return true;
+		} elseif ( isset( $_REQUEST['action'] ) && '-1' !== $_REQUEST['action'] ) {
+			return true;
+		} elseif ( isset( $_REQUEST['action2'] ) && '-1' !== $_REQUEST['action2'] ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -74,7 +82,7 @@ class Main {
 
 		$vars->user_id = get_current_user_id();
 
-		if ( isset( $_REQUEST['delete_all'] ) ) {
+		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
 			$vars->action = 'delete_all';
 
 			$vars->post_status = $_REQUEST['post_status'];
