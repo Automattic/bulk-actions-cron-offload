@@ -16,8 +16,8 @@ class Delete_All {
 	public static function register_hooks() {
 		add_action( self::CRON_EVENT, array( __CLASS__, 'process_via_cron' ) );
 
-		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_delete' ), 999, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
+		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_delete' ), 999, 2 );
 	}
 
 	/**
@@ -33,45 +33,6 @@ class Delete_All {
 		} else {
 			self::redirect( false );
 		}
-	}
-
-	/**
-	 * Find the next scheduled instance of a given action, regardless of arguments
-	 *
-	 * @param  string $action_to_check Hook to search for
-	 * @param  string $post_type       Post type hook is scheduled for
-	 * @return array
-	 */
-	private static function action_next_scheduled( $action_to_check, $post_type ) {
-		$events = get_option( 'cron' );
-
-		if ( ! is_array( $events ) ) {
-			return array();
-		}
-
-		foreach ( $events as $timestamp => $timestamp_events ) {
-			// Skip non-event data that Core includes in the option
-			if ( ! is_numeric( $timestamp ) ) {
-				continue;
-			}
-
-			foreach ( $timestamp_events as $action => $action_instances ) {
-				if ( $action !== $action_to_check ) {
-					continue;
-				}
-
-				foreach ( $action_instances as $instance => $instance_args ) {
-					$vars = array_shift( $instance_args['args'] );
-
-					if ( $post_type === $vars->post_type ) {
-						return array( 'timestamp' => $timestamp, 'args' => $vars, );
-					}
-				}
-			}
-		}
-
-		// No matching event found
-		return array();
 	}
 
 	/**
@@ -144,6 +105,29 @@ class Delete_All {
 	}
 
 	/**
+	 * Let the user know what's going on
+	 */
+	public static function admin_notices() {
+		if ( ! isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
+			return;
+		}
+
+		if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
+			$class   = 'notice-success';
+			$message = __( 'Success! The trash will be emptied soon.', 'automattic-bulk-edit-cron-offload' );
+		} else {
+			$class   = 'notice-error';
+			$message = __( 'A request to empty the trash is already pending for this post type.', 'automattic-bulk-edit-cron-offload' );
+		}
+
+		?>
+		<div class="notice <?php echo esc_attr( $class ); ?>">
+			<p><?php echo esc_html( $message ); ?></p>
+		</div>
+		<?php
+	}
+
+	/**
 	 * When a delete is pending for a given post type, hide those posts in the admin
 	 */
 	public static function hide_posts_pending_delete( $where, $q ) {
@@ -167,26 +151,42 @@ class Delete_All {
 	}
 
 	/**
-	 * Let the user know what's going on
+	 * Find the next scheduled instance of a given action, regardless of arguments
+	 *
+	 * @param  string $action_to_check Hook to search for
+	 * @param  string $post_type       Post type hook is scheduled for
+	 * @return array
 	 */
-	public static function admin_notices() {
-		if ( ! isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
-			return;
+	private static function action_next_scheduled( $action_to_check, $post_type ) {
+		$events = get_option( 'cron' );
+
+		if ( ! is_array( $events ) ) {
+			return array();
 		}
 
-		if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-			$class   = 'notice-success';
-			$message = __( 'Success! The trash will be emptied soon.', 'automattic-bulk-edit-cron-offload' );
-		} else {
-			$class   = 'notice-error';
-			$message = __( 'A request to empty the trash is already pending for this post type.', 'automattic-bulk-edit-cron-offload' );
+		foreach ( $events as $timestamp => $timestamp_events ) {
+			// Skip non-event data that Core includes in the option
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $timestamp_events as $action => $action_instances ) {
+				if ( $action !== $action_to_check ) {
+					continue;
+				}
+
+				foreach ( $action_instances as $instance => $instance_args ) {
+					$vars = array_shift( $instance_args['args'] );
+
+					if ( $post_type === $vars->post_type ) {
+						return array( 'timestamp' => $timestamp, 'args' => $vars, );
+					}
+				}
+			}
 		}
 
-		?>
-		<div class="notice <?php echo esc_attr( $class ); ?>">
-			<p><?php echo esc_html( $message ); ?></p>
-		</div>
-		<?php
+		// No matching event found
+		return array();
 	}
 }
 
