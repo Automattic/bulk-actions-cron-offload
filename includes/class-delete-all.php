@@ -101,7 +101,8 @@ class Delete_All {
 		// Add a flag for the admin notice
 		$redirect = add_query_arg( self::ADMIN_NOTICE_KEY, $succeeded ? 1 : -1, $redirect );
 
-		wp_redirect( $redirect );
+		$redirect = esc_url_raw( $redirect );
+		wp_safe_redirect( $redirect );
 		exit;
 	}
 
