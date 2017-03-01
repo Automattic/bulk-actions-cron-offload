@@ -48,8 +48,11 @@ class Main {
 				return;
 				break;
 
-			// How did you get here?
+			// Should only arrive here if loaded on the wrong admin screen
 			default :
+				error_log( var_export( get_current_screen(), true ) );
+				error_log( var_export( wp_debug_backtrace_summary( __CLASS__, null, false ), true ) );
+
 				return;
 				break;
 		}
