@@ -155,7 +155,7 @@ class Delete_All {
 			return $where;
 		}
 
-		if ( self::action_next_scheduled( self::CRON_EVENT, $q->get( 'post_type') ) ) {
+		if ( self::action_next_scheduled( self::CRON_EVENT, $q->get( 'post_type' ) ) ) {
 			$where .= ' AND 0=1';
 		}
 
