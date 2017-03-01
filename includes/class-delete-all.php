@@ -15,15 +15,15 @@ class Delete_All {
 	 */
 	public static function register_hooks() {
 		add_action( self::CRON_EVENT, array( __CLASS__, 'process_via_cron' ) );
+
+		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_delete' ), 999, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 	}
 
 	/**
-	 *
+	 * Handle a request to delete all trashed items for a given post type
 	 */
 	public static function process( $vars ) {
-		// TODO: Add hook to hide posts when their deletion is pending
-
 		$action_scheduled = self::action_next_scheduled( self::CRON_EVENT, $vars->post_type );
 
 		if ( empty( $action_scheduled ) ) {
@@ -75,7 +75,7 @@ class Delete_All {
 	}
 
 	/**
-	 *
+	 * Cron callback to delete trashed items in a given post type
 	 */
 	public static function process_via_cron( $vars ) {
 		global $wpdb;
@@ -141,6 +141,29 @@ class Delete_All {
 
 		wp_redirect( $redirect );
 		exit;
+	}
+
+	/**
+	 * When a delete is pending for a given post type, hide those posts in the admin
+	 */
+	public static function hide_posts_pending_delete( $where, $q ) {
+		if ( ! is_admin() || ! $q->is_main_query() ) {
+			return $where;
+		}
+
+		if ( 'edit' !== get_current_screen()->base ) {
+			return $where;
+		}
+
+		if ( 'trash' !== $q->get( 'post_status' ) ) {
+			return $where;
+		}
+
+		if ( self::action_next_scheduled( self::CRON_EVENT, $q->get( 'post_type') ) ) {
+			$where .= ' AND 0=1';
+		}
+
+		return $where;
 	}
 
 	/**
