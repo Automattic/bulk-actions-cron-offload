@@ -4,37 +4,35 @@ namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
 class Delete_All {
 	/**
-	 *
+	 * Class constants
 	 */
 	const CRON_EVENT = 'a8c_bulk_edit_delete_all';
 
+	const ADMIN_NOTICE_KEY = 'a8c_bulk_edit_deleted_all';
+
 	/**
-	 *
+	 * Register this bulk process' hooks
 	 */
 	public static function register_hooks() {
 		add_action( self::CRON_EVENT, array( __CLASS__, 'process_via_cron' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 	}
 
 	/**
 	 *
 	 */
 	public static function process( $vars ) {
-		// Queue job
-		// Filter redirect
-		// Register admin notices
-		// Add hook to hide posts when their deletion is pending
+		// TODO: Add hook to hide posts when their deletion is pending
 
 		// TODO: Insufficient, need to check regardless of args :(
 		$existing_event_ts = wp_next_scheduled( self::CRON_EVENT, array( $vars ) );
 
 		if ( $existing_event_ts ) {
-			// TODO: Notice that event already scheduled
-			self::redirect_error();
+			self::redirect( false );
 		} else {
 			wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
 
-			// TODO: Notice that event scheduled
-			self::redirect_success();
+			self::redirect( true );
 		}
 	}
 
@@ -42,10 +40,6 @@ class Delete_All {
 	 *
 	 */
 	public static function process_via_cron( $vars ) {
-		// Get posts by type and status
-		// Loop, check perms, delete
-		// What to do about those that fail?
-
 		global $wpdb;
 
 		$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_status = %s", $vars->post_type, $vars->post_status ) );
@@ -90,19 +84,44 @@ class Delete_All {
 	}
 
 	/**
+	 * Redirect, including a flag to indicate if the bulk process was scheduled successfully
 	 *
+	 * @param bool $succeed Whether or not the bulk-delete was scheduled
 	 */
-	public static function redirect_error() {
-		// TODO: implement
-		self::redirect_success();
+	public static function redirect( $succeed = false ) {
+		$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
+
+		// Remove arguments that could re-trigger this bulk-edit
+		$redirect = remove_query_arg( array( '_wp_http_referer', '_wpnonce', 'delete_all', 'delete_all2', ), $redirect );
+
+		// Add a flag for the admin notice
+		$redirect = add_query_arg( self::ADMIN_NOTICE_KEY, $succeed ? 1 : -1, $redirect );
+
+		wp_redirect( $redirect );
+		exit;
 	}
 
 	/**
-	 *
+	 * Let the user know what's going on
 	 */
-	public static function redirect_success() {
-		wp_redirect( remove_query_arg( array( '_wp_http_referer', '_wpnonce', 'delete_all', 'delete_all2', ), wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
-		exit;
+	public function admin_notices() {
+		if ( ! isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
+			return;
+		}
+
+		if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
+			$class   = 'notice-success';
+			$message = __( 'Success! The trash will be emptied soon.', 'automattic-bulk-edit-cron-offload' );
+		} else {
+			$class   = 'notice-error';
+			$message = __( 'An error occurred while emptying the trash. Please try again.', 'automattic-bulk-edit-cron-offload' );
+		}
+
+		?>
+		<div class="notice <?php echo esc_attr( $class ); ?>">
+			<p><?php echo esc_html( $message ); ?></p>
+		</div>
+		<?php
 	}
 }
 
