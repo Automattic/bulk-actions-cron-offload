@@ -25,19 +25,25 @@ class Main {
 		// Now what?
 		switch ( $vars->action ) {
 			case 'delete_all' :
+				self::skip_core_processing();
+
 				Delete_All::process( $vars );
 				break;
 
 			case 'trash' :
+				return;
 				break;
 
 			case 'untrash' :
+				return;
 				break;
 
 			case 'delete' :
+				return;
 				break;
 
 			case 'edit' :
+				return;
 				break;
 
 			// How did you get here?
@@ -61,10 +67,10 @@ class Main {
 			$vars->action = 'delete_all';
 
 			$vars->post_status = $_REQUEST['post_status'];
-		} elseif ( isset( $_REQUEST['action'] ) && -1 !== (int) $_REQUEST['action'] ) {
-			$vars->action = (int) $_REQUEST['action'];
-		} elseif ( isset( $_REQUEST['action2'] ) && -1 !== (int) $_REQUEST['action2'] ) {
-			$vars->action = (int) $_REQUEST['action2'];
+		} elseif ( isset( $_REQUEST['action'] ) && '-1' !== $_REQUEST['action'] ) {
+			$vars->action = $_REQUEST['action'];
+		} elseif ( isset( $_REQUEST['action2'] ) && '-1' !== $_REQUEST['action2'] ) {
+			$vars->action = $_REQUEST['action2'];
 		}
 
 		if ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) {
@@ -80,7 +86,7 @@ class Main {
 		}
 
 		if ( isset( $_REQUEST['post_author'] ) && -1 !== (int) $_REQUEST['post_author'] ) {
-			$vars->post_author = $_REQUEST['post_author'];
+			$vars->post_author = (int) $_REQUEST['post_author'];
 		}
 
 		if ( isset( $_REQUEST['comment_status'] ) && ! empty( $_REQUEST['comment_status'] ) ) {
@@ -91,25 +97,29 @@ class Main {
 			$vars->ping_status = $_REQUEST['ping_status'];
 		}
 
-		if ( isset( $_REQUEST['_status'] ) && -1 !== (int) $_REQUEST['_status'] ) {
+		if ( isset( $_REQUEST['_status'] ) && '-1' !== $_REQUEST['_status'] ) {
 			$vars->post_status = $_REQUEST['_status'];
 		}
 
-		if ( isset( $_REQUEST['sticky'] ) && -1 !== (int) $_REQUEST['sticky'] ) {
+		if ( isset( $_REQUEST['sticky'] ) && '-1' !== $_REQUEST['sticky'] ) {
 			$vars->post_sticky = $_REQUEST['sticky'];
 		}
 
-		if ( isset( $_REQUEST['post_format'] ) && -1 !== (int) $_REQUEST['post_format'] ) {
+		if ( isset( $_REQUEST['post_format'] ) && '-1' !== $_REQUEST['post_format'] ) {
 			$vars->post_format = $_REQUEST['post_format'];
 		}
 
-		// Stop Core from processing bulk request
+		// Return captured variables
+		return $vars;
+	}
+
+	/**
+	 * Unset flags Core uses to trigger bulk processing
+	 */
+	private static function skip_core_processing() {
 		unset( $_REQUEST['action'] );
 		unset( $_REQUEST['action2'] );
 		unset( $_REQUEST['delete_all'] );
-
-		// Return captured variables
-		return $vars;
 	}
 }
 
