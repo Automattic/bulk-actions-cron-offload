@@ -15,9 +15,11 @@ class Main {
 	 */
 	public static function intercept() {
 		// Nothing to do
-		if ( ! isset( $_REQUEST['action'] ) && ! isset( $_REQUEST['action2'] ) && ! isset( $_REQUEST['delete_all'] ) ) {
+		if ( ! self::should_intercept_request() ) {
 			return;
 		}
+
+		// TODO: nonce/referrer checks
 
 		// Parse request to determine what to do
 		$vars = self::capture_vars();
@@ -51,6 +53,13 @@ class Main {
 				return;
 				break;
 		}
+	}
+
+	/**
+	 * Determine if current request is a bulk edit
+	 */
+	private static function should_intercept_request() {
+		return isset( $_REQUEST['action'] ) || isset( $_REQUEST['action2'] ) || isset( $_REQUEST['delete_all'] );
 	}
 
 	/**
