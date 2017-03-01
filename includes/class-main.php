@@ -19,7 +19,8 @@ class Main {
 			return;
 		}
 
-		// TODO: nonce/referrer checks
+		// Validate request
+		check_admin_referer( 'bulk-posts' );
 
 		// Parse request to determine what to do
 		$vars = self::capture_vars();
