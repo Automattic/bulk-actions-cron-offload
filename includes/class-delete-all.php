@@ -128,16 +128,16 @@ class Delete_All {
 	/**
 	 * Redirect, including a flag to indicate if the bulk process was scheduled successfully
 	 *
-	 * @param bool $succeed Whether or not the bulk-delete was scheduled
+	 * @param bool $succeeded Whether or not the bulk-delete was scheduled
 	 */
-	public static function redirect( $succeed = false ) {
+	public static function redirect( $succeeded = false ) {
 		$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
 
 		// Remove arguments that could re-trigger this bulk-edit
 		$redirect = remove_query_arg( array( '_wp_http_referer', '_wpnonce', 'delete_all', 'delete_all2', ), $redirect );
 
 		// Add a flag for the admin notice
-		$redirect = add_query_arg( self::ADMIN_NOTICE_KEY, $succeed ? 1 : -1, $redirect );
+		$redirect = add_query_arg( self::ADMIN_NOTICE_KEY, $succeeded ? 1 : -1, $redirect );
 
 		wp_redirect( $redirect );
 		exit;
