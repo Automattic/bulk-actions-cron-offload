@@ -10,6 +10,9 @@
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
+// Plugin dependencies
+require __DIR__ . '/includes/utils.php';
+
 // Plugin functionality
 require __DIR__ . '/includes/class-main.php';
 require __DIR__ . '/includes/class-delete-all.php';

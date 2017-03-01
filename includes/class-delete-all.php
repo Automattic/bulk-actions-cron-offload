@@ -24,16 +24,54 @@ class Delete_All {
 	public static function process( $vars ) {
 		// TODO: Add hook to hide posts when their deletion is pending
 
-		// TODO: Insufficient, need to check regardless of args :(
-		$existing_event_ts = wp_next_scheduled( self::CRON_EVENT, array( $vars ) );
+		$action_scheduled = self::action_next_scheduled( self::CRON_EVENT, $vars->post_type );
 
-		if ( $existing_event_ts ) {
-			self::redirect( false );
-		} else {
+		if ( empty( $action_scheduled ) ) {
 			wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
 
 			self::redirect( true );
+		} else {
+			self::redirect( false );
 		}
+	}
+
+	/**
+	 * Find the next scheduled instance of a given action, regardless of arguments
+	 *
+	 * @param  string $action_to_check Hook to search for
+	 * @param  string $post_type       Post type hook is scheduled for
+	 * @return array
+	 */
+	private static function action_next_scheduled( $action_to_check, $post_type ) {
+		$events = get_option( 'cron' );
+
+		if ( ! is_array( $events ) ) {
+			return array();
+		}
+
+		foreach ( $events as $timestamp => $timestamp_events ) {
+			// Skip non-event data that Core includes in the option
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $timestamp_events as $action => $action_instances ) {
+				if ( $action !== $action_to_check ) {
+					continue;
+				}
+
+				foreach ( $action_instances as $instance => $instance_args ) {
+					$vars = array_shift( $instance_args['args'] );
+
+					if ( $post_type === $vars->post_type ) {
+						return array( 'timestamp' => $timestamp, 'args' => $vars, );
+					}
+				}
+			}
+		}
+
+		// No matching event found
+		return array();
 	}
 
 	/**
@@ -44,6 +82,8 @@ class Delete_All {
 
 		$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_status = %s", $vars->post_type, $vars->post_status ) );
 
+		$count = 0;
+
 		if ( is_array( $post_ids ) && ! empty( $post_ids ) ) {
 			require_once ABSPATH . '/wp-admin/includes/post.php';
 
@@ -51,7 +91,6 @@ class Delete_All {
 
 			foreach ( $post_ids as $post_id ) {
 				// Can the user delete this post
-
 				if ( ! user_can( $vars->user_id, 'delete_post', $post_id ) ) {
 					$auth_error[] = $post_id;
 					continue;
@@ -63,7 +102,7 @@ class Delete_All {
 					continue;
 				}
 
-				//
+				// Try deleting
 				$post_deleted = wp_delete_post( $post_id );
 				if ( $post_deleted ) {
 					$deleted[] = $post_id;
@@ -71,7 +110,10 @@ class Delete_All {
 					$error[] = $post_id;
 				}
 
-				// TODO: stop_the_insanity()
+				// Take a break periodically
+				if ( 0 === $count++ % 50 ) {
+					stop_the_insanity();
+				}
 			}
 
 			// TODO: something meaningful with this data
@@ -104,7 +146,7 @@ class Delete_All {
 	/**
 	 * Let the user know what's going on
 	 */
-	public function admin_notices() {
+	public static function admin_notices() {
 		if ( ! isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			return;
 		}
@@ -114,7 +156,7 @@ class Delete_All {
 			$message = __( 'Success! The trash will be emptied soon.', 'automattic-bulk-edit-cron-offload' );
 		} else {
 			$class   = 'notice-error';
-			$message = __( 'An error occurred while emptying the trash. Please try again.', 'automattic-bulk-edit-cron-offload' );
+			$message = __( 'A request to empty the trash is already pending for this post type.', 'automattic-bulk-edit-cron-offload' );
 		}
 
 		?>
