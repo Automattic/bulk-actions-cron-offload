@@ -71,8 +71,6 @@ class Main {
 	private static function capture_vars() {
 		$vars = (object) array_fill_keys( array( 'user_id', 'action', 'post_type', 'posts', 'tax_input', 'post_author', 'comment_status', 'ping_status', 'post_status', 'post_sticky', 'post_format', ), null );
 
-		// TODO: replace with foreach and switch
-
 		$vars->user_id = get_current_user_id();
 
 		if ( isset( $_REQUEST['delete_all'] ) ) {
