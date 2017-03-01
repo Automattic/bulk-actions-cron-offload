@@ -19,6 +19,11 @@ class Delete_All {
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_delete' ), 999, 2 );
+
+		// Limit when caps are intercepted, given frequent execution of the `map_meta_cap` filter
+		add_action( 'load-edit.php', function() {
+			add_filter( 'map_meta_cap', array( __CLASS__, 'hide_empty_trash_pending_delete' ), 10, 2 );
+		} );
 	}
 
 	/**
@@ -160,6 +165,43 @@ class Delete_All {
 		}
 
 		return $where;
+	}
+
+	/**
+	 * Suppress "Empty Trash" button when purge is pending
+	 *
+	 * Core doesn't provide a filter specifically for this, but permissions are checked before showing the button
+	 *
+	 * @param  array  $caps User's capabilities
+	 * @param  string $cap  Cap currently being checked
+	 * @return array
+	 */
+	public static function hide_empty_trash_pending_delete( $caps, $cap ) {
+		// Button we're blocking only shows for the "trash" status, understandably
+		if ( ! isset( $_REQUEST['post_status'] ) || 'trash' !== $_REQUEST['post_status'] ) {
+			return $caps;
+		}
+
+		// Get post type as Core envisions
+		$screen = get_current_screen();
+
+		// Cap used to display button, per WP_Posts_List_Table::extra_tablenav()
+		$cap_to_block = get_post_type_object( $screen->post_type )->cap->edit_others_posts;
+
+		// The current cap isn't the one we're looking for
+		if ( $cap !== $cap_to_block ) {
+			return $caps;
+		}
+
+		// There isn't a pending purge, so one should be permitted
+		if ( ! self::action_next_scheduled( self::CRON_EVENT, $screen->post_type ) ) {
+			return $caps;
+		}
+
+		// Block the edit button by disallowing its cap
+		$caps[] = 'do_not_allow';
+
+		return $caps;
 	}
 
 	/**
