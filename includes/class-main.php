@@ -4,6 +4,11 @@ namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
 class Main {
 	/**
+	 * Prefix for bulk-process hook invoked by request-specific classes
+	 */
+	const ACTION = 'a8c_bulk_edit_cron_';
+
+	/**
 	 * Register action
 	 */
 	public static function load() {
@@ -23,39 +28,19 @@ class Main {
 		check_admin_referer( 'bulk-posts' );
 
 		// Parse request to determine what to do
-		$vars = self::capture_vars();
+		$vars   = self::capture_vars();
+		$action = self::build_hook( $vars->action );
 
-		// Now what?
-		switch ( $vars->action ) {
-			case 'delete_all' :
-				self::skip_core_processing();
+		if ( ! self::bulk_action_allowed( $vars->action ) ) {
+			return;
+		}
 
-				Delete_All::process( $vars );
-				break;
+		// Pass request to a class to handle offloading to cron, UX, etc
+		do_action( $action, $vars );
 
-			case 'trash' :
-				return;
-				break;
-
-			case 'untrash' :
-				return;
-				break;
-
-			case 'delete' :
-				return;
-				break;
-
-			case 'edit' :
-				return;
-				break;
-
-			// Should only arrive here if loaded on the wrong admin screen
-			default :
-				error_log( var_export( get_current_screen(), true ) );
-				error_log( var_export( wp_debug_backtrace_summary( __CLASS__, null, false ), true ) );
-
-				return;
-				break;
+		// Only skip Core's default handling when
+		if ( has_action( $action ) ) {
+			self::skip_core_processing();
 		}
 	}
 
@@ -130,6 +115,34 @@ class Main {
 
 		// Return captured variables
 		return $vars;
+	}
+
+	/**
+	 * Validate action
+	 *
+	 * @param  string $action Action parsed from request vars
+	 * @return bool
+	 */
+	public static function bulk_action_allowed( $action ) {
+		$allowed_actions = array(
+			'delete',
+			'delete_all',
+			'edit',
+			'trash',
+			'untrash',
+		);
+
+		return in_array( $action, $allowed_actions, true );
+	}
+
+	/**
+	 * Build a WP hook specific to a bulk request
+	 *
+	 * @param  string $action Bulk action to offload
+	 * @return string
+	 */
+	public static function build_hook( $action ) {
+		return self::ACTION . $action;
 	}
 
 	/**
