@@ -152,6 +152,7 @@ class Main {
 		unset( $_REQUEST['action'] );
 		unset( $_REQUEST['action2'] );
 		unset( $_REQUEST['delete_all'] );
+		unset( $_REQUEST['delete_all2'] );
 	}
 }
 
