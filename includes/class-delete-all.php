@@ -118,7 +118,7 @@ class Delete_All {
 		$screen = get_current_screen();
 
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
-			if ( 1 === (int) $_REQUEST[self::ADMIN_NOTICE_KEY] ) {
+			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
 				$class = 'notice-success';
 				$message = __( 'Success! The trash will be emptied soon.', 'automattic-bulk-edit-cron-offload' );
 			} else {

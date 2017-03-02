@@ -38,7 +38,7 @@ class Main {
 		// Pass request to a class to handle offloading to cron, UX, etc
 		do_action( $action, $vars );
 
-		// Only skip Core's default handling when
+		// Only skip Core's default handling when action is offloaded
 		if ( has_action( $action ) ) {
 			self::skip_core_processing();
 		}
