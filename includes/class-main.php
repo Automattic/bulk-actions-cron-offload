@@ -154,6 +154,29 @@ class Main {
 		unset( $_REQUEST['delete_all'] );
 		unset( $_REQUEST['delete_all2'] );
 	}
+
+	/**
+	 * Redirect, including a flag to indicate if the bulk process was scheduled successfully
+	 *
+	 * @param string  $return_key  Key to include in redirect URL to flag request's origin, use for admin feedback, etc.
+	 * @param bool    $succeeded   Whether or not the bulk-delete was scheduled
+	 * @param array   $extra_keys  Array of additional action keys to remove from redirect URL. Optional.
+	 */
+	public static function do_admin_redirect( $return_key, $succeeded = false, $extra_keys = array() ) {
+		$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
+
+		// Remove arguments that could re-trigger this bulk-edit
+		$action_keys = array( '_wp_http_referer', '_wpnonce', 'action', 'action2', );
+		$action_keys = array_merge( $action_keys, $extra_keys );
+		$redirect    = remove_query_arg( $action_keys, $redirect );
+
+		// Add a flag for the admin notice
+		$redirect = add_query_arg( $return_key, $succeeded ? 1 : -1, $redirect );
+
+		$redirect = esc_url_raw( $redirect );
+		wp_safe_redirect( $redirect );
+		exit;
+	}
 }
 
 Main::load();

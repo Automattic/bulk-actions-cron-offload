@@ -30,14 +30,17 @@ class Delete_All {
 	 * Handle a request to delete all trashed items for a given post type
 	 */
 	public static function process( $vars ) {
+		// Special keys are used to trigger this request, and we need to remove them on redirect
+		$extra_keys = array( 'delete_all', 'delete_all2', );
+
 		$action_scheduled = self::action_next_scheduled( self::CRON_EVENT, $vars->post_type );
 
 		if ( empty( $action_scheduled ) ) {
 			wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
 
-			self::redirect( true );
+			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true, $extra_keys );
 		} else {
-			self::redirect( false );
+			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, false, $extra_keys );
 		}
 	}
 
@@ -90,25 +93,6 @@ class Delete_All {
 			// TODO: What to do here?
 			return false;
 		}
-	}
-
-	/**
-	 * Redirect, including a flag to indicate if the bulk process was scheduled successfully
-	 *
-	 * @param bool $succeeded Whether or not the bulk-delete was scheduled
-	 */
-	public static function redirect( $succeeded = false ) {
-		$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
-
-		// Remove arguments that could re-trigger this bulk-edit
-		$redirect = remove_query_arg( array( '_wp_http_referer', '_wpnonce', 'delete_all', 'delete_all2', ), $redirect );
-
-		// Add a flag for the admin notice
-		$redirect = add_query_arg( self::ADMIN_NOTICE_KEY, $succeeded ? 1 : -1, $redirect );
-
-		$redirect = esc_url_raw( $redirect );
-		wp_safe_redirect( $redirect );
-		exit;
 	}
 
 	/**
