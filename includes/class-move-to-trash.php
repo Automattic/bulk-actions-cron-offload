@@ -21,7 +21,7 @@ class Move_To_Trash {
 	 */
 	public static function register_hooks() {
 		add_action( Main::build_hook( 'trash' ), array( __CLASS__, 'process' ) );
-		add_action( self::CRON_EVENT, array( __CLASS__, 'process_via_cron' ) );
+		add_action( Main::build_cron_hook( 'trash' ), array( __CLASS__, 'process_via_cron' ) );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class Move_To_Trash {
 	 * @param object $vars Bulk-request variables.
 	 */
 	public static function process( $vars ) {
-		Main::schedule_processing( self::CRON_EVENT, $vars );
+		Main::schedule_processing( $vars );
 		Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true );
 	}
 

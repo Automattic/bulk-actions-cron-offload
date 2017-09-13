@@ -17,10 +17,26 @@ class Main {
 	const ACTION = 'a8c_bulk_edit_cron_';
 
 	/**
-	 * Register action
+	 * Common cron action
+	 */
+	const CRON_EVENT = 'bulk_edit_cron_offload';
+
+	/**
+	 * Register actions
 	 */
 	public static function load() {
+		add_action( self::CRON_EVENT, array( __CLASS__, 'do_cron' ) );
+
 		add_action( 'load-edit.php', array( __CLASS__, 'intercept' ) );
+	}
+
+	/**
+	 * Run appropriate cron callback
+	 *
+	 * @param object $vars Bulk-request variables.
+	 */
+	public static function do_cron( $vars ) {
+		do_action( self::build_cron_hook( $vars->action ), $vars );
 	}
 
 	/**
@@ -153,6 +169,16 @@ class Main {
 	}
 
 	/**
+	 * Build a cron hook specific to a bulk request
+	 *
+	 * @param  string $action Bulk action to register cron callback for.
+	 * @return string
+	 */
+	public static function build_cron_hook( $action ) {
+		return self::ACTION . $action . '_callback';
+	}
+
+	/**
 	 * Unset flags Core uses to trigger bulk processing
 	 */
 	private static function skip_core_processing() {
@@ -188,12 +214,11 @@ class Main {
 	/**
 	 * Create cron event
 	 *
-	 * @param string $event Cron action.
 	 * @param object $vars Bulk-request variables.
 	 * @return bool
 	 */
-	public static function schedule_processing( $event, $vars ) {
-		return false !== wp_schedule_single_event( time(), $event, array( $vars ) );
+	public static function schedule_processing( $vars ) {
+		return false !== wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
 	}
 }
 
