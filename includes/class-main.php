@@ -1,50 +1,76 @@
 <?php
+/**
+ * Plugin's main class, dispatcher for specific bulk-edit requests
+ *
+ * @package Bulk_Edit_Cron_Offload
+ */
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
+/**
+ * Class Main
+ */
 class Main extends Singleton {
 	/**
 	 * Requested action
+	 *
+	 * @var string
 	 */
 	private $action = null;
 
 	/**
 	 * Posts to process
+	 *
+	 * @var array
 	 */
 	private $posts = null;
 
 	/**
 	 * Taxonomy terms to add
+	 *
+	 * @var array
 	 */
 	private $tax_input = null;
 
 	/**
 	 * Post author to set
+	 *
+	 * @var int
 	 */
 	private $post_author = null;
 
 	/**
 	 * Comment status to set
+	 *
+	 * @var string
 	 */
 	private $comment_status = null;
 
 	/**
 	 * Ping status to set
+	 *
+	 * @var string
 	 */
 	private $ping_status = null;
 
 	/**
 	 * New post status
+	 *
+	 * @var string
 	 */
 	private $post_status = null;
 
 	/**
-	 * Posts' stick status
+	 * Posts' sticky status
+	 *
+	 * @var int
 	 */
 	private $post_sticky = null;
 
 	/**
 	 * Posts' format
+	 *
+	 * @var string
 	 */
 	private $post_format = null;
 
@@ -59,12 +85,12 @@ class Main extends Singleton {
 	 * Call appropriate handler
 	 */
 	public function intercept() {
-		// Nothing to do
+		// Nothing to do.
 		if ( ! isset( $_REQUEST['action'] ) ) {
 			return;
 		}
 
-		// Parse request to determine what to do
+		// Parse request to determine what to do.
 		$this->populate_vars();
 
 		// Now what?
@@ -72,20 +98,20 @@ class Main extends Singleton {
 			case 'delete_all' :
 				break;
 
-			case 'trash' :
+			case 'trash':
 				break;
 
-			case 'untrash' :
+			case 'untrash':
 				break;
 
-			case 'delete' :
+			case 'delete':
 				break;
 
-			case 'edit' :
+			case 'edit':
 				break;
 
 			// How did you get here?
-			default :
+			default:
 				return;
 				break;
 		}
@@ -129,7 +155,7 @@ class Main extends Singleton {
 			$this->post_format = $_REQUEST['post_format'];
 		}
 
-		// Stop Core from processing bulk request
+		// Stop Core from processing bulk request.
 		unset( $_REQUEST['action'] );
 		unset( $_REQUEST['action2'] );
 	}
