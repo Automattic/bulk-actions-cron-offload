@@ -150,7 +150,7 @@ class Move_To_Trash {
 		$post__not_in = self::get_post_ids_pending_move( $q->get( 'post_type' ), $q->get( 'post_status' ) );
 
 		if ( ! empty( $post__not_in ) ) {
-			$post__not_in = implode(',', $post__not_in );
+			$post__not_in = implode( ',', $post__not_in );
 			$where       .= ' AND ID NOT IN(' . $post__not_in . ')';
 		}
 

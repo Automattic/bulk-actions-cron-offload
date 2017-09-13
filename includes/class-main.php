@@ -202,6 +202,7 @@ class Main {
 	}
 
 	/**
+	 * Retrieve timestamp for next scheduled event with given vars
 	 *
 	 * @param object $vars Bulk-request variables.
 	 * @return int
