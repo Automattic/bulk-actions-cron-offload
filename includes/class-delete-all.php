@@ -206,7 +206,7 @@ class Delete_All {
 	/**
 	 * Find the next scheduled instance of a given action, regardless of arguments
 	 *
-	 * @param  string $post_type       Post type hook is scheduled for.
+	 * @param  string $post_type Post type hook is scheduled for.
 	 * @return array
 	 */
 	private static function action_next_scheduled( $post_type ) {
@@ -230,7 +230,7 @@ class Delete_All {
 				foreach ( $action_instances as $instance => $instance_args ) {
 					$vars = array_shift( $instance_args['args'] );
 
-					if ( $post_type === $vars->post_type ) {
+					if ( 'delete_all' === $vars->action && $post_type === $vars->post_type ) {
 						return array(
 							'timestamp' => $timestamp,
 							'args'      => $vars,
