@@ -93,8 +93,6 @@ class Main {
 
 		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
 			$vars->action = 'delete_all';
-
-			$vars->post_status = $_REQUEST['post_status'];
 		} elseif ( isset( $_REQUEST['action'] ) && '-1' !== $_REQUEST['action'] ) {
 			$vars->action = $_REQUEST['action'];
 		} elseif ( isset( $_REQUEST['action2'] ) && '-1' !== $_REQUEST['action2'] ) {
@@ -135,6 +133,11 @@ class Main {
 
 		if ( isset( $_REQUEST['post_format'] ) && '-1' !== $_REQUEST['post_format'] ) {
 			$vars->post_format = $_REQUEST['post_format'];
+		}
+
+		// Post status is special.
+		if ( is_null( $vars->post_status ) && isset( $_REQUEST['post_status'] ) && ! empty( $_REQUEST['post_status'] ) ) {
+			$vars->post_status = $_REQUEST['post_status'];
 		}
 
 		return $vars;
