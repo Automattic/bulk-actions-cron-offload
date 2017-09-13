@@ -1,4 +1,9 @@
 <?php
+/**
+ * Plugin's main class, dispatcher for specific bulk-edit requests
+ *
+ * @package Bulk_Edit_Cron_Offload
+ */
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 

@@ -1,18 +1,22 @@
 <?php
-/*
- Plugin Name: Offload Bulk Edit to Cron
- Plugin URI: https://vip.wordpress.com/
- Description: Process Bulk Edit requests using Cron
- Author: Erick Hitter, Automattic
- Version: 1.0
- Text Domain: automattic-bulk-edit-cron-offload
+/**
+ * Plugin Name:     Bulk Edit Cron Offload
+ * Plugin URI:      https://vip.wordpress.com/
+ * Description:     Process Bulk Edit requests using Cron
+ * Author:          Erick Hitter, Automattic
+ * Author URI:      https://automattic.com/
+ * Text Domain:     automattic-bulk-edit-cron-offload
+ * Domain Path:     /languages
+ * Version:         1.0
+ *
+ * @package         Bulk_Edit_Cron_Offload
  */
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
-// Plugin dependencies
+// Plugin dependencies.
 require __DIR__ . '/includes/utils.php';
 
-// Plugin functionality
+// Plugin functionality.
 require __DIR__ . '/includes/class-main.php';
 require __DIR__ . '/includes/class-delete-all.php';
