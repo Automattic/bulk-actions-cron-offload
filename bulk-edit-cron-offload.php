@@ -20,3 +20,4 @@ require __DIR__ . '/includes/utils.php';
 // Plugin functionality.
 require __DIR__ . '/includes/class-main.php';
 require __DIR__ . '/includes/class-delete-all.php';
+require __DIR__ . '/includes/class-move-to-trash.php';

@@ -17,10 +17,26 @@ class Main {
 	const ACTION = 'a8c_bulk_edit_cron_';
 
 	/**
-	 * Register action
+	 * Common cron action
+	 */
+	const CRON_EVENT = 'bulk_edit_cron_offload';
+
+	/**
+	 * Register actions
 	 */
 	public static function load() {
+		add_action( self::CRON_EVENT, array( __CLASS__, 'do_cron' ) );
+
 		add_action( 'load-edit.php', array( __CLASS__, 'intercept' ) );
+	}
+
+	/**
+	 * Run appropriate cron callback
+	 *
+	 * @param object $vars Bulk-request variables.
+	 */
+	public static function do_cron( $vars ) {
+		do_action( self::build_cron_hook( $vars->action ), $vars );
 	}
 
 	/**
@@ -77,8 +93,6 @@ class Main {
 
 		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
 			$vars->action = 'delete_all';
-
-			$vars->post_status = $_REQUEST['post_status'];
 		} elseif ( isset( $_REQUEST['action'] ) && '-1' !== $_REQUEST['action'] ) {
 			$vars->action = $_REQUEST['action'];
 		} elseif ( isset( $_REQUEST['action2'] ) && '-1' !== $_REQUEST['action2'] ) {
@@ -121,6 +135,11 @@ class Main {
 			$vars->post_format = $_REQUEST['post_format'];
 		}
 
+		// Post status is special.
+		if ( is_null( $vars->post_status ) && isset( $_REQUEST['post_status'] ) && ! empty( $_REQUEST['post_status'] ) ) {
+			$vars->post_status = $_REQUEST['post_status'];
+		}
+
 		return $vars;
 	}
 
@@ -153,6 +172,16 @@ class Main {
 	}
 
 	/**
+	 * Build a cron hook specific to a bulk request
+	 *
+	 * @param  string $action Bulk action to register cron callback for.
+	 * @return string
+	 */
+	public static function build_cron_hook( $action ) {
+		return self::ACTION . $action . '_callback';
+	}
+
+	/**
 	 * Unset flags Core uses to trigger bulk processing
 	 */
 	private static function skip_core_processing() {
@@ -160,6 +189,26 @@ class Main {
 		unset( $_REQUEST['action2'] );
 		unset( $_REQUEST['delete_all'] );
 		unset( $_REQUEST['delete_all2'] );
+	}
+
+	/**
+	 * Create cron event
+	 *
+	 * @param object $vars Bulk-request variables.
+	 * @return bool
+	 */
+	public static function schedule_processing( $vars ) {
+		return false !== wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
+	}
+
+	/**
+	 * Retrieve timestamp for next scheduled event with given vars
+	 *
+	 * @param object $vars Bulk-request variables.
+	 * @return int
+	 */
+	public static function next_scheduled( $vars ) {
+		return (int) wp_next_scheduled( self::CRON_EVENT, array( $vars ) );
 	}
 
 	/**
@@ -183,6 +232,26 @@ class Main {
 		$redirect = esc_url_raw( $redirect );
 		wp_safe_redirect( $redirect );
 		exit;
+	}
+
+	/**
+	 * Render an admin message of a given type
+	 *
+	 * @param string $type Message type.
+	 * @param string $message Message to output.
+	 * @return void
+	 */
+	public static function render_admin_notice( $type, $message ) {
+		// Lacking what's required.
+		if ( empty( $type ) || empty( $message ) ) {
+			return;
+		}
+
+		?>
+		<div class="notice <?php echo esc_attr( 'notice-' . $type ); ?>">
+			<p><?php echo esc_html( $message ); ?></p>
+		</div>
+		<?php
 	}
 }
 

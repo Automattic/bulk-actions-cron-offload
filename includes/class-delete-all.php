@@ -14,16 +14,14 @@ class Delete_All {
 	/**
 	 * Class constants
 	 */
-	const CRON_EVENT = 'a8c_bulk_edit_delete_all';
-
-	const ADMIN_NOTICE_KEY = 'a8c_bulk_edit_deleted_all';
+	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_deleted_all';
 
 	/**
 	 * Register this bulk process' hooks
 	 */
 	public static function register_hooks() {
 		add_action( Main::build_hook( 'delete_all' ), array( __CLASS__, 'process' ) );
-		add_action( self::CRON_EVENT, array( __CLASS__, 'process_via_cron' ) );
+		add_action( Main::build_cron_hook( 'delete_all' ), array( __CLASS__, 'process_via_cron' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_delete' ), 999, 2 );
@@ -43,11 +41,10 @@ class Delete_All {
 		// Special keys are used to trigger this request, and we need to remove them on redirect.
 		$extra_keys = array( 'delete_all', 'delete_all2' );
 
-		$action_scheduled = self::action_next_scheduled( self::CRON_EVENT, $vars->post_type );
+		$action_scheduled = self::action_next_scheduled( $vars->post_type );
 
 		if ( empty( $action_scheduled ) ) {
-			wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
-
+			Main::schedule_processing( $vars );
 			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true, $extra_keys );
 		} else {
 			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, false, $extra_keys );
@@ -115,31 +112,25 @@ class Delete_All {
 	public static function admin_notices() {
 		$screen = get_current_screen();
 
+		$type    = '';
+		$message = '';
+
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$class = 'notice-success';
-				$message = __( 'Success! The trash will be emptied soon.', 'bulk-edit-cron-offload' );
+				$type    = 'success';
+				$message = __( 'Success! The trash will be emptied shortly.', 'bulk-edit-cron-offload' );
 			} else {
-				$class = 'notice-error';
+				$type    = 'error';
 				$message = __( 'A request to empty the trash is already pending for this post type.', 'bulk-edit-cron-offload' );
 			}
 		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
-			if ( self::action_next_scheduled( self::CRON_EVENT, $screen->post_type ) ) {
-				$class   = 'notice-warning';
+			if ( self::action_next_scheduled( $screen->post_type ) ) {
+				$type    = 'warning';
 				$message = __( 'A pending request to empty the trash will be processed soon.', 'bulk-edit-cron-offload' );
 			}
 		}
 
-		// Nothing to display.
-		if ( ! isset( $class ) || ! isset( $message ) ) {
-			return;
-		}
-
-		?>
-		<div class="notice <?php echo esc_attr( $class ); ?>">
-			<p><?php echo esc_html( $message ); ?></p>
-		</div>
-		<?php
+		Main::render_admin_notice( $type, $message );
 	}
 
 	/**
@@ -162,7 +153,7 @@ class Delete_All {
 			return $where;
 		}
 
-		if ( self::action_next_scheduled( self::CRON_EVENT, $q->get( 'post_type' ) ) ) {
+		if ( self::action_next_scheduled( $q->get( 'post_type' ) ) ) {
 			$where .= ' AND 0=1';
 		}
 
@@ -196,7 +187,7 @@ class Delete_All {
 		}
 
 		// There isn't a pending purge, so one should be permitted.
-		if ( ! self::action_next_scheduled( self::CRON_EVENT, $screen->post_type ) ) {
+		if ( ! self::action_next_scheduled( $screen->post_type ) ) {
 			return $caps;
 		}
 
@@ -209,11 +200,10 @@ class Delete_All {
 	/**
 	 * Find the next scheduled instance of a given action, regardless of arguments
 	 *
-	 * @param  string $action_to_check Hook to search for.
-	 * @param  string $post_type       Post type hook is scheduled for.
+	 * @param  string $post_type Post type hook is scheduled for.
 	 * @return array
 	 */
-	private static function action_next_scheduled( $action_to_check, $post_type ) {
+	private static function action_next_scheduled( $post_type ) {
 		$events = get_option( 'cron' );
 
 		if ( ! is_array( $events ) ) {
@@ -227,14 +217,14 @@ class Delete_All {
 			}
 
 			foreach ( $timestamp_events as $action => $action_instances ) {
-				if ( $action !== $action_to_check ) {
+				if ( Main::CRON_EVENT !== $action ) {
 					continue;
 				}
 
 				foreach ( $action_instances as $instance => $instance_args ) {
 					$vars = array_shift( $instance_args['args'] );
 
-					if ( $post_type === $vars->post_type ) {
+					if ( 'delete_all' === $vars->action && $post_type === $vars->post_type ) {
 						return array(
 							'timestamp' => $timestamp,
 							'args'      => $vars,
