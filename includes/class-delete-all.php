@@ -58,7 +58,6 @@ class Delete_All {
 	 * Cron callback to delete trashed items in a given post type
 	 *
 	 * @param object $vars Bulk-request variables.
-	 * @return array|bool
 	 */
 	public static function process_via_cron( $vars ) {
 		global $wpdb;
@@ -103,12 +102,10 @@ class Delete_All {
 				}
 			}
 
-			// TODO: something meaningful with this data.
 			$results = compact( 'deleted', 'locked', 'auth_error', 'error' );
-			return $results;
+			do_action( 'bulk_edit_cron_offload_delete_all_request_completed', $results, $vars );
 		} else {
-			// TODO: What to do here?
-			return false;
+			do_action( 'bulk_edit_cron_offload_delete_all_request_no_posts', $post_ids, $vars );
 		}
 	}
 
