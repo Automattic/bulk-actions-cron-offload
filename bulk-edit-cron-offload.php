@@ -5,7 +5,7 @@
  * Description:     Process Bulk Edit requests using Cron
  * Author:          Erick Hitter, Automattic
  * Author URI:      https://automattic.com/
- * Text Domain:     automattic-bulk-edit-cron-offload
+ * Text Domain:     bulk-edit-cron-offload
  * Domain Path:     /languages
  * Version:         1.0
  *
