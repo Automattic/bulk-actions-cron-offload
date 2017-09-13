@@ -70,7 +70,10 @@ class Delete_All {
 		if ( is_array( $post_ids ) && ! empty( $post_ids ) ) {
 			require_once ABSPATH . '/wp-admin/includes/post.php';
 
-			$deleted = $locked = $auth_error = $error = array();
+			$deleted    = array();
+			$locked     = array();
+			$auth_error = array();
+			$error      = array();
 
 			foreach ( $post_ids as $post_id ) {
 				// Can the user delete this post.
