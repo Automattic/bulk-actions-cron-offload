@@ -1,7 +1,15 @@
 <?php
+/**
+ * Offload "Move to Trash"
+ *
+ * @package Bulk_Edit_Cron_Offload
+ */
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
+/**
+ * Class Move_To_Trash
+ */
 class Move_To_Trash {
 	/**
 	 * Class constants
@@ -17,6 +25,8 @@ class Move_To_Trash {
 
 	/**
 	 * Handle a request to delete all trashed items for a given post type
+	 *
+	 * @param object $vars Bulk-request variables.
 	 */
 	public static function process( $vars ) {
 		error_log( var_export( $vars, true ) );
