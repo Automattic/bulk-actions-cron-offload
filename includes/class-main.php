@@ -7,6 +7,9 @@
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
+/**
+ * Class Main
+ */
 class Main {
 	/**
 	 * Prefix for bulk-process hook invoked by request-specific classes
@@ -24,15 +27,15 @@ class Main {
 	 * Call appropriate handler
 	 */
 	public static function intercept() {
-		// Nothing to do
+		// Nothing to do.
 		if ( ! self::should_intercept_request() ) {
 			return;
 		}
 
-		// Validate request
+		// Validate request.
 		check_admin_referer( 'bulk-posts' );
 
-		// Parse request to determine what to do
+		// Parse request to determine what to do.
 		$vars   = self::capture_vars();
 		$action = self::build_hook( $vars->action );
 
@@ -40,10 +43,10 @@ class Main {
 			return;
 		}
 
-		// Pass request to a class to handle offloading to cron, UX, etc
+		// Pass request to a class to handle offloading to cron, UX, etc.
 		do_action( $action, $vars );
 
-		// Only skip Core's default handling when action is offloaded
+		// Only skip Core's default handling when action is offloaded.
 		if ( has_action( $action ) ) {
 			self::skip_core_processing();
 		}
@@ -68,7 +71,7 @@ class Main {
 	 * Capture relevant variables
 	 */
 	private static function capture_vars() {
-		$vars = (object) array_fill_keys( array( 'user_id', 'action', 'post_type', 'posts', 'tax_input', 'post_author', 'comment_status', 'ping_status', 'post_status', 'post_sticky', 'post_format', ), null );
+		$vars = (object) array_fill_keys( array( 'user_id', 'action', 'post_type', 'posts', 'tax_input', 'post_author', 'comment_status', 'ping_status', 'post_status', 'post_sticky', 'post_format' ), null );
 
 		$vars->user_id = get_current_user_id();
 
@@ -118,14 +121,13 @@ class Main {
 			$vars->post_format = $_REQUEST['post_format'];
 		}
 
-		// Return captured variables
 		return $vars;
 	}
 
 	/**
 	 * Validate action
 	 *
-	 * @param  string $action Action parsed from request vars
+	 * @param  string $action Action parsed from request vars.
 	 * @return bool
 	 */
 	public static function bulk_action_allowed( $action ) {
@@ -143,7 +145,7 @@ class Main {
 	/**
 	 * Build a WP hook specific to a bulk request
 	 *
-	 * @param  string $action Bulk action to offload
+	 * @param  string $action Bulk action to offload.
 	 * @return string
 	 */
 	public static function build_hook( $action ) {
@@ -163,19 +165,19 @@ class Main {
 	/**
 	 * Redirect, including a flag to indicate if the bulk process was scheduled successfully
 	 *
-	 * @param string  $return_key  Key to include in redirect URL to flag request's origin, use for admin feedback, etc.
-	 * @param bool    $succeeded   Whether or not the bulk-delete was scheduled
-	 * @param array   $extra_keys  Array of additional action keys to remove from redirect URL. Optional.
+	 * @param string $return_key  Key to include in redirect URL to flag request's origin, use for admin feedback, etc.
+	 * @param bool   $succeeded   Whether or not the bulk-delete was scheduled.
+	 * @param array  $extra_keys  Optional. Array of additional action keys to remove from redirect URL.
 	 */
 	public static function do_admin_redirect( $return_key, $succeeded = false, $extra_keys = array() ) {
 		$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
 
-		// Remove arguments that could re-trigger this bulk-edit
-		$action_keys = array( '_wp_http_referer', '_wpnonce', 'action', 'action2', );
+		// Remove arguments that could re-trigger this bulk-edit.
+		$action_keys = array( '_wp_http_referer', '_wpnonce', 'action', 'action2' );
 		$action_keys = array_merge( $action_keys, $extra_keys );
 		$redirect    = remove_query_arg( $action_keys, $redirect );
 
-		// Add a flag for the admin notice
+		// Add a flag for the admin notice.
 		$redirect = add_query_arg( $return_key, $succeeded ? 1 : -1, $redirect );
 
 		$redirect = esc_url_raw( $redirect );

@@ -1,7 +1,15 @@
 <?php
+/**
+ * Offload "Empty Trash"
+ *
+ * @package Bulk_Edit_Cron_Offload
+ */
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
+/**
+ * Class Delete_All
+ */
 class Delete_All {
 	/**
 	 * Class constants
@@ -20,7 +28,7 @@ class Delete_All {
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_delete' ), 999, 2 );
 
-		// Limit when caps are intercepted, given frequent execution of the `map_meta_cap` filter
+		// Limit when caps are intercepted, given frequent execution of the `map_meta_cap` filter.
 		add_action( 'load-edit.php', function() {
 			add_filter( 'map_meta_cap', array( __CLASS__, 'hide_empty_trash_pending_delete' ), 10, 2 );
 		} );
@@ -28,10 +36,12 @@ class Delete_All {
 
 	/**
 	 * Handle a request to delete all trashed items for a given post type
+	 *
+	 * @param object $vars Bulk-request variables.
 	 */
 	public static function process( $vars ) {
-		// Special keys are used to trigger this request, and we need to remove them on redirect
-		$extra_keys = array( 'delete_all', 'delete_all2', );
+		// Special keys are used to trigger this request, and we need to remove them on redirect.
+		$extra_keys = array( 'delete_all', 'delete_all2' );
 
 		$action_scheduled = self::action_next_scheduled( self::CRON_EVENT, $vars->post_type );
 
@@ -46,6 +56,9 @@ class Delete_All {
 
 	/**
 	 * Cron callback to delete trashed items in a given post type
+	 *
+	 * @param object $vars Bulk-request variables.
+	 * @return array|bool
 	 */
 	public static function process_via_cron( $vars ) {
 		global $wpdb;
@@ -60,19 +73,19 @@ class Delete_All {
 			$deleted = $locked = $auth_error = $error = array();
 
 			foreach ( $post_ids as $post_id ) {
-				// Can the user delete this post
+				// Can the user delete this post.
 				if ( ! user_can( $vars->user_id, 'delete_post', $post_id ) ) {
 					$auth_error[] = $post_id;
 					continue;
 				}
 
-				// Post is locked by someone, so leave it alone
+				// Post is locked by someone, so leave it alone.
 				if ( false !== wp_check_post_lock( $post_id ) ) {
 					$locked[] = $post_id;
 					continue;
 				}
 
-				// Try deleting
+				// Try deleting.
 				$post_deleted = wp_delete_post( $post_id );
 				if ( $post_deleted ) {
 					$deleted[] = $post_id;
@@ -80,13 +93,13 @@ class Delete_All {
 					$error[] = $post_id;
 				}
 
-				// Take a break periodically
+				// Take a break periodically.
 				if ( 0 === $count++ % 50 ) {
 					stop_the_insanity();
 				}
 			}
 
-			// TODO: something meaningful with this data
+			// TODO: something meaningful with this data.
 			$results = compact( 'deleted', 'locked', 'auth_error', 'error' );
 			return $results;
 		} else {
@@ -116,7 +129,7 @@ class Delete_All {
 			}
 		}
 
-		// Nothing to display
+		// Nothing to display.
 		if ( ! isset( $class ) || ! isset( $message ) ) {
 			return;
 		}
@@ -130,6 +143,10 @@ class Delete_All {
 
 	/**
 	 * When a delete is pending for a given post type, hide those posts in the admin
+	 *
+	 * @param string $where Posts' WHERE clause.
+	 * @param object $q WP_Query object.
+	 * @return string
 	 */
 	public static function hide_posts_pending_delete( $where, $q ) {
 		if ( ! is_admin() || ! $q->is_main_query() ) {
@@ -156,33 +173,33 @@ class Delete_All {
 	 *
 	 * Core doesn't provide a filter specifically for this, but permissions are checked before showing the button
 	 *
-	 * @param  array  $caps User's capabilities
-	 * @param  string $cap  Cap currently being checked
+	 * @param  array  $caps User's capabilities.
+	 * @param  string $cap  Cap currently being checked.
 	 * @return array
 	 */
 	public static function hide_empty_trash_pending_delete( $caps, $cap ) {
-		// Button we're blocking only shows for the "trash" status, understandably
+		// Button we're blocking only shows for the "trash" status, understandably.
 		if ( ! isset( $_REQUEST['post_status'] ) || 'trash' !== $_REQUEST['post_status'] ) {
 			return $caps;
 		}
 
-		// Get post type as Core envisions
+		// Get post type as Core envisions.
 		$screen = get_current_screen();
 
-		// Cap used to display button, per WP_Posts_List_Table::extra_tablenav()
+		// Cap used to display button, per WP_Posts_List_Table::extra_tablenav().
 		$cap_to_block = get_post_type_object( $screen->post_type )->cap->edit_others_posts;
 
-		// The current cap isn't the one we're looking for
+		// The current cap isn't the one we're looking for.
 		if ( $cap !== $cap_to_block ) {
 			return $caps;
 		}
 
-		// There isn't a pending purge, so one should be permitted
+		// There isn't a pending purge, so one should be permitted.
 		if ( ! self::action_next_scheduled( self::CRON_EVENT, $screen->post_type ) ) {
 			return $caps;
 		}
 
-		// Block the edit button by disallowing its cap
+		// Block the edit button by disallowing its cap.
 		$caps[] = 'do_not_allow';
 
 		return $caps;
@@ -191,8 +208,8 @@ class Delete_All {
 	/**
 	 * Find the next scheduled instance of a given action, regardless of arguments
 	 *
-	 * @param  string $action_to_check Hook to search for
-	 * @param  string $post_type       Post type hook is scheduled for
+	 * @param  string $action_to_check Hook to search for.
+	 * @param  string $post_type       Post type hook is scheduled for.
 	 * @return array
 	 */
 	private static function action_next_scheduled( $action_to_check, $post_type ) {
@@ -203,7 +220,7 @@ class Delete_All {
 		}
 
 		foreach ( $events as $timestamp => $timestamp_events ) {
-			// Skip non-event data that Core includes in the option
+			// Skip non-event data that Core includes in the option.
 			if ( ! is_numeric( $timestamp ) ) {
 				continue;
 			}
@@ -217,13 +234,16 @@ class Delete_All {
 					$vars = array_shift( $instance_args['args'] );
 
 					if ( $post_type === $vars->post_type ) {
-						return array( 'timestamp' => $timestamp, 'args' => $vars, );
+						return array(
+							'timestamp' => $timestamp,
+							'args'      => $vars,
+						);
 					}
 				}
 			}
 		}
 
-		// No matching event found
+		// No matching event found.
 		return array();
 	}
 }

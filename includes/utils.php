@@ -1,4 +1,9 @@
 <?php
+/**
+ * Plugin utilities
+ *
+ * @package Bulk_Edit_Cron_Offload
+ */
 
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
@@ -8,7 +13,7 @@ namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 function stop_the_insanity() {
 	global $wpdb, $wp_object_cache;
 
-	$wpdb->queries = array(); // or define( 'WP_IMPORTING', true );
+	$wpdb->queries = array();
 
 	if ( ! is_object( $wp_object_cache ) ) {
 		return;
@@ -20,6 +25,6 @@ function stop_the_insanity() {
 	$wp_object_cache->cache          = array();
 
 	if ( is_callable( $wp_object_cache, '__remoteset' ) ) {
-		$wp_object_cache->__remoteset(); // important
+		$wp_object_cache->__remoteset(); // important!
 	}
 }
