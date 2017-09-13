@@ -14,14 +14,16 @@ class Delete_All {
 	/**
 	 * Class constants
 	 */
+	const ACTION = 'delete_all';
+
 	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_deleted_all';
 
 	/**
 	 * Register this bulk process' hooks
 	 */
 	public static function register_hooks() {
-		add_action( Main::build_hook( 'delete_all' ), array( __CLASS__, 'process' ) );
-		add_action( Main::build_cron_hook( 'delete_all' ), array( __CLASS__, 'process_via_cron' ) );
+		add_action( Main::build_hook( self::ACTION ), array( __CLASS__, 'process' ) );
+		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_delete' ), 999, 2 );
@@ -39,7 +41,7 @@ class Delete_All {
 	 */
 	public static function process( $vars ) {
 		// Special keys are used to trigger this request, and we need to remove them on redirect.
-		$extra_keys = array( 'delete_all', 'delete_all2' );
+		$extra_keys = array( self::ACTION, self::ACTION . '2' );
 
 		$action_scheduled = self::action_next_scheduled( $vars->post_type );
 
@@ -224,7 +226,7 @@ class Delete_All {
 				foreach ( $action_instances as $instance => $instance_args ) {
 					$vars = array_shift( $instance_args['args'] );
 
-					if ( 'delete_all' === $vars->action && $post_type === $vars->post_type ) {
+					if ( self::ACTION === $vars->action && $post_type === $vars->post_type ) {
 						return array(
 							'timestamp' => $timestamp,
 							'args'      => $vars,

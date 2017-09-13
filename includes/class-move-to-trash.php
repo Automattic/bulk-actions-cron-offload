@@ -14,14 +14,16 @@ class Move_To_Trash {
 	/**
 	 * Class constants
 	 */
+	const ACTION = 'trash';
+
 	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_move_to_trash';
 
 	/**
 	 * Register this bulk process' hooks
 	 */
 	public static function register_hooks() {
-		add_action( Main::build_hook( 'trash' ), array( __CLASS__, 'process' ) );
-		add_action( Main::build_cron_hook( 'trash' ), array( __CLASS__, 'process_via_cron' ) );
+		add_action( Main::build_hook( self::ACTION ), array( __CLASS__, 'process' ) );
+		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_move' ), 999, 2 );
@@ -187,7 +189,7 @@ class Move_To_Trash {
 				foreach ( $action_instances as $instance => $instance_args ) {
 					$vars = array_shift( $instance_args['args'] );
 
-					if ( 'trash' === $vars->action && $post_type === $vars->post_type ) {
+					if ( self::ACTION === $vars->action && $post_type === $vars->post_type ) {
 						if ( $post_status === $vars->post_status || 'all' === $vars->post_status || 'all' === $post_status ) {
 							$ids[] = array(
 								'timestamp' => $timestamp,
