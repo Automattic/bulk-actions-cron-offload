@@ -14,7 +14,7 @@ class Move_To_Trash {
 	/**
 	 * Class constants
 	 */
-	const CRON_EVENT = 'a8c_bulk_edit_move_to_trash';
+	const CRON_EVENT = 'bulk_edit_cron_offload_move_to_trash';
 
 	/**
 	 * Register this bulk process' hooks

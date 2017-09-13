@@ -14,9 +14,9 @@ class Delete_All {
 	/**
 	 * Class constants
 	 */
-	const CRON_EVENT = 'a8c_bulk_edit_delete_all';
+	const CRON_EVENT = 'bulk_edit_cron_offload_delete_all';
 
-	const ADMIN_NOTICE_KEY = 'a8c_bulk_edit_deleted_all';
+	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_deleted_all';
 
 	/**
 	 * Register this bulk process' hooks
