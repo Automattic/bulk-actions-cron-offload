@@ -14,7 +14,7 @@ class Move_To_Trash {
 	/**
 	 * Class constants
 	 */
-	const CRON_EVENT = 'bulk_edit_cron_offload_move_to_trash';
+	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_move_to_trash';
 
 	/**
 	 * Register this bulk process' hooks
@@ -22,6 +22,8 @@ class Move_To_Trash {
 	public static function register_hooks() {
 		add_action( Main::build_hook( 'trash' ), array( __CLASS__, 'process' ) );
 		add_action( Main::build_cron_hook( 'trash' ), array( __CLASS__, 'process_via_cron' ) );
+
+		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 	}
 
 	/**
@@ -83,6 +85,36 @@ class Move_To_Trash {
 		} else {
 			do_action( 'bulk_edit_cron_offload_move_to_trash_request_no_posts', $vars->posts, $vars );
 		}
+	}
+
+	/**
+	 * Let the user know what's going on
+	 */
+	public static function admin_notices() {
+		$screen = get_current_screen();
+
+		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
+			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
+				$class = 'notice-success';
+				$message = __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-edit-cron-offload' );
+			} else {
+				$class = 'notice-error';
+				$message = __( 'An unknown error occurred.', 'bulk-edit-cron-offload' );
+			}
+		}
+
+		// TODO: show a notice if any move requests are pending for this post type ($screen->post_type).
+
+		// Nothing to display.
+		if ( ! isset( $class ) || ! isset( $message ) ) {
+			return;
+		}
+
+		?>
+		<div class="notice <?php echo esc_attr( $class ); ?>">
+			<p><?php echo esc_html( $message ); ?></p>
+		</div>
+		<?php
 	}
 }
 
