@@ -100,12 +100,15 @@ class Move_To_Trash {
 	public static function admin_notices() {
 		$screen = get_current_screen();
 
+		$type   = '';
+		$message = '';
+
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$class   = 'notice-success';
+				$type    = 'success';
 				$message = __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-edit-cron-offload' );
 			} else {
-				$class   = 'notice-error';
+				$type    = 'error';
 				$message = __( 'The selected posts are already scheduled to be moved to the trash.', 'bulk-edit-cron-offload' );
 			}
 		} elseif ( 'edit' === $screen->base ) {
@@ -116,21 +119,12 @@ class Move_To_Trash {
 			$status = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
 
 			if ( self::get_all_pending_actions( $screen->post_type, $status ) ) {
-				$class   = 'notice-warning';
+				$type    = 'warning';
 				$message = __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-edit-cron-offload' );
 			}
 		}
 
-		// Nothing to display.
-		if ( ! isset( $class ) || ! isset( $message ) ) {
-			return;
-		}
-
-		?>
-		<div class="notice <?php echo esc_attr( $class ); ?>">
-			<p><?php echo esc_html( $message ); ?></p>
-		</div>
-		<?php
+		Main::render_admin_notice( $type, $message );
 	}
 
 	/**

@@ -112,31 +112,25 @@ class Delete_All {
 	public static function admin_notices() {
 		$screen = get_current_screen();
 
+		$type    = '';
+		$message = '';
+
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$class   = 'notice-success';
+				$type    = 'success';
 				$message = __( 'Success! The trash will be emptied shortly.', 'bulk-edit-cron-offload' );
 			} else {
-				$class   = 'notice-error';
+				$type    = 'error';
 				$message = __( 'A request to empty the trash is already pending for this post type.', 'bulk-edit-cron-offload' );
 			}
 		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( self::action_next_scheduled( $screen->post_type ) ) {
-				$class   = 'notice-warning';
+				$type    = 'warning';
 				$message = __( 'A pending request to empty the trash will be processed soon.', 'bulk-edit-cron-offload' );
 			}
 		}
 
-		// Nothing to display.
-		if ( ! isset( $class ) || ! isset( $message ) ) {
-			return;
-		}
-
-		?>
-		<div class="notice <?php echo esc_attr( $class ); ?>">
-			<p><?php echo esc_html( $message ); ?></p>
-		</div>
-		<?php
+		Main::render_admin_notice( $type, $message );
 	}
 
 	/**

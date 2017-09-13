@@ -192,6 +192,25 @@ class Main {
 	}
 
 	/**
+	 * Create cron event
+	 *
+	 * @param object $vars Bulk-request variables.
+	 * @return bool
+	 */
+	public static function schedule_processing( $vars ) {
+		return false !== wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
+	}
+
+	/**
+	 *
+	 * @param object $vars Bulk-request variables.
+	 * @return int
+	 */
+	public static function next_scheduled( $vars ) {
+		return (int) wp_next_scheduled( self::CRON_EVENT, array( $vars ) );
+	}
+
+	/**
 	 * Redirect, including a flag to indicate if the bulk process was scheduled successfully
 	 *
 	 * @param string $return_key  Key to include in redirect URL to flag request's origin, use for admin feedback, etc.
@@ -215,22 +234,23 @@ class Main {
 	}
 
 	/**
-	 * Create cron event
+	 * Render an admin message of a given type
 	 *
-	 * @param object $vars Bulk-request variables.
-	 * @return bool
+	 * @param string $type Message type.
+	 * @param string $message Message to output.
+	 * @return void
 	 */
-	public static function schedule_processing( $vars ) {
-		return false !== wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
-	}
+	public static function render_admin_notice( $type, $message ) {
+		// Lacking what's required.
+		if ( empty( $type ) || empty( $message ) ) {
+			return;
+		}
 
-	/**
-	 *
-	 * @param object $vars Bulk-request variables.
-	 * @return int
-	 */
-	public static function next_scheduled( $vars ) {
-		return (int) wp_next_scheduled( self::CRON_EVENT, array( $vars ) );
+		?>
+		<div class="notice <?php echo esc_attr( 'notice-' . $type ); ?>">
+			<p><?php echo esc_html( $message ); ?></p>
+		</div>
+		<?php
 	}
 }
 
