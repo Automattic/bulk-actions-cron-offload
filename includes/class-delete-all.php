@@ -114,10 +114,10 @@ class Delete_All {
 
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$class = 'notice-success';
+				$class   = 'notice-success';
 				$message = __( 'Success! The trash will be emptied shortly.', 'bulk-edit-cron-offload' );
 			} else {
-				$class = 'notice-error';
+				$class   = 'notice-error';
 				$message = __( 'A request to empty the trash is already pending for this post type.', 'bulk-edit-cron-offload' );
 			}
 		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {

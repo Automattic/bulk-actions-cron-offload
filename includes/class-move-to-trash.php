@@ -24,6 +24,7 @@ class Move_To_Trash {
 		add_action( Main::build_cron_hook( 'trash' ), array( __CLASS__, 'process_via_cron' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
+		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_move' ), 999, 2 );
 	}
 
 	/**
@@ -101,15 +102,24 @@ class Move_To_Trash {
 
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$class = 'notice-success';
+				$class   = 'notice-success';
 				$message = __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-edit-cron-offload' );
 			} else {
-				$class = 'notice-error';
+				$class   = 'notice-error';
 				$message = __( 'The selected posts are already scheduled to be moved to the trash.', 'bulk-edit-cron-offload' );
 			}
-		}
+		} elseif ( 'edit' === $screen->base ) {
+			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
+				return;
+			}
 
-		// TODO: show a notice if _any_ move requests are pending for this post type ($screen->post_type).
+			$status = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
+
+			if ( self::get_all_pending_actions( $screen->post_type, $status ) ) {
+				$class   = 'notice-warning';
+				$message = __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-edit-cron-offload' );
+			}
+		}
 
 		// Nothing to display.
 		if ( ! isset( $class ) || ! isset( $message ) ) {
@@ -121,6 +131,106 @@ class Move_To_Trash {
 			<p><?php echo esc_html( $message ); ?></p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * When a move is pending for a given post type, hide those posts in the admin
+	 *
+	 * @param string $where Posts' WHERE clause.
+	 * @param object $q WP_Query object.
+	 * @return string
+	 */
+	public static function hide_posts_pending_move( $where, $q ) {
+		if ( ! is_admin() || ! $q->is_main_query() ) {
+			return $where;
+		}
+
+		if ( 'edit' !== get_current_screen()->base ) {
+			return $where;
+		}
+
+		if ( 'trash' === $q->get( 'post_status' ) ) {
+			return $where;
+		}
+
+		$post__not_in = self::get_post_ids_pending_move( $q->get( 'post_type' ), $q->get( 'post_status' ) );
+
+		if ( ! empty( $post__not_in ) ) {
+			$post__not_in = implode(',', $post__not_in );
+			$where       .= ' AND ID NOT IN(' . $post__not_in . ')';
+		}
+
+		return $where;
+	}
+
+	/**
+	 * Gather all pending events for a given post type
+	 *
+	 * @param string $post_type Post type needing exclusion.
+	 * @param string $post_status Post status to filter by.
+	 * @return array
+	 */
+	private static function get_all_pending_actions( $post_type, $post_status ) {
+		$events = get_option( 'cron' );
+
+		if ( ! is_array( $events ) ) {
+			return array();
+		}
+
+		$ids = array();
+
+		foreach ( $events as $timestamp => $timestamp_events ) {
+			// Skip non-event data that Core includes in the option.
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $timestamp_events as $action => $action_instances ) {
+				if ( Main::CRON_EVENT !== $action ) {
+					continue;
+				}
+
+				foreach ( $action_instances as $instance => $instance_args ) {
+					$vars = array_shift( $instance_args['args'] );
+
+					if ( 'trash' === $vars->action && $post_type === $vars->post_type ) {
+						if ( $post_status === $vars->post_status || 'all' === $vars->post_status || 'all' === $post_status ) {
+							$ids[] = array(
+								'timestamp' => $timestamp,
+								'args'      => $vars,
+							);
+						}
+					}
+				}
+			}
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Gather IDs of objects pending move to trash, with given post type
+	 *
+	 * @param string $post_type Post type needing exclusion.
+	 * @param string $post_status Post status to filter by.
+	 * @return array
+	 */
+	private static function get_post_ids_pending_move( $post_type, $post_status ) {
+		$events = wp_list_pluck( self::get_all_pending_actions( $post_type, $post_status ), 'args' );
+		$events = wp_list_pluck( $events, 'posts' );
+
+		$ids = array();
+
+		foreach ( $events as $ids_to_merge ) {
+			$ids = array_merge( $ids, $ids_to_merge );
+		}
+
+		if ( ! empty( $ids ) ) {
+			$ids = array_map( 'absint', $ids );
+			$ids = array_unique( $ids );
+		}
+
+		return $ids;
 	}
 }
 
