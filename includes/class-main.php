@@ -184,6 +184,17 @@ class Main {
 		wp_safe_redirect( $redirect );
 		exit;
 	}
+
+	/**
+	 * Create cron event
+	 *
+	 * @param string $event Cron action.
+	 * @param object $vars Bulk-request variables.
+	 * @return bool
+	 */
+	public static function schedule_processing( $event, $vars ) {
+		return false !== wp_schedule_single_event( time(), $event, array( $vars ) );
+	}
 }
 
 Main::load();

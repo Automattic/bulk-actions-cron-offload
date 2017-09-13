@@ -46,8 +46,7 @@ class Delete_All {
 		$action_scheduled = self::action_next_scheduled( self::CRON_EVENT, $vars->post_type );
 
 		if ( empty( $action_scheduled ) ) {
-			wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
-
+			Main::schedule_processing( self::CRON_EVENT, $vars );
 			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true, $extra_keys );
 		} else {
 			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, false, $extra_keys );

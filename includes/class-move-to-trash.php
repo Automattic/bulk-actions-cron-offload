@@ -30,8 +30,7 @@ class Move_To_Trash {
 	 * @param object $vars Bulk-request variables.
 	 */
 	public static function process( $vars ) {
-		wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
-
+		Main::schedule_processing( self::CRON_EVENT, $vars );
 		Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true );
 	}
 
