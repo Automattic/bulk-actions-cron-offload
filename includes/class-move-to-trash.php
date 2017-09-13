@@ -32,8 +32,14 @@ class Move_To_Trash {
 	 * @param object $vars Bulk-request variables.
 	 */
 	public static function process( $vars ) {
-		Main::schedule_processing( $vars );
-		Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true );
+		$action_scheduled = Main::next_scheduled( $vars );
+
+		if ( empty( $action_scheduled ) ) {
+			Main::schedule_processing( $vars );
+			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true );
+		} else {
+			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
+		}
 	}
 
 	/**
@@ -99,11 +105,11 @@ class Move_To_Trash {
 				$message = __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-edit-cron-offload' );
 			} else {
 				$class = 'notice-error';
-				$message = __( 'An unknown error occurred.', 'bulk-edit-cron-offload' );
+				$message = __( 'The selected posts are already scheduled to be moved to the trash.', 'bulk-edit-cron-offload' );
 			}
 		}
 
-		// TODO: show a notice if any move requests are pending for this post type ($screen->post_type).
+		// TODO: show a notice if _any_ move requests are pending for this post type ($screen->post_type).
 
 		// Nothing to display.
 		if ( ! isset( $class ) || ! isset( $message ) ) {

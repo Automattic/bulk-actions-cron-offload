@@ -220,6 +220,15 @@ class Main {
 	public static function schedule_processing( $vars ) {
 		return false !== wp_schedule_single_event( time(), self::CRON_EVENT, array( $vars ) );
 	}
+
+	/**
+	 *
+	 * @param object $vars Bulk-request variables.
+	 * @return int
+	 */
+	public static function next_scheduled( $vars ) {
+		return (int) wp_next_scheduled( self::CRON_EVENT, array( $vars ) );
+	}
 }
 
 Main::load();
