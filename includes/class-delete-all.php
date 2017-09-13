@@ -76,7 +76,7 @@ class Delete_All {
 			$error      = array();
 
 			foreach ( $post_ids as $post_id ) {
-				// Can the user delete this post.
+				// Can the user delete this post?
 				if ( ! user_can( $vars->user_id, 'delete_post', $post_id ) ) {
 					$auth_error[] = $post_id;
 					continue;
@@ -99,6 +99,7 @@ class Delete_All {
 				// Take a break periodically.
 				if ( 0 === $count++ % 50 ) {
 					stop_the_insanity();
+					sleep( 3 );
 				}
 			}
 
@@ -120,15 +121,15 @@ class Delete_All {
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
 				$class = 'notice-success';
-				$message = __( 'Success! The trash will be emptied soon.', 'automattic-bulk-edit-cron-offload' );
+				$message = __( 'Success! The trash will be emptied soon.', 'bulk-edit-cron-offload' );
 			} else {
 				$class = 'notice-error';
-				$message = __( 'A request to empty the trash is already pending for this post type.', 'automattic-bulk-edit-cron-offload' );
+				$message = __( 'A request to empty the trash is already pending for this post type.', 'bulk-edit-cron-offload' );
 			}
 		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( self::action_next_scheduled( self::CRON_EVENT, $screen->post_type ) ) {
 				$class   = 'notice-warning';
-				$message = __( 'A pending request to empty the trash will be processed soon.', 'automattic-bulk-edit-cron-offload' );
+				$message = __( 'A pending request to empty the trash will be processed soon.', 'bulk-edit-cron-offload' );
 			}
 		}
 

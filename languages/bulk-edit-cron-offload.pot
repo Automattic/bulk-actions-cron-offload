@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Bulk Edit Cron Offload 1.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/bulk-edit-cron-offload\n"
-"POT-Creation-Date: 2017-09-13 00:10:57+00:00\n"
+"POT-Creation-Date: 2017-09-13 01:24:54+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -24,6 +24,18 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-Bookmarks: \n"
 "X-Textdomain-Support: yes\n"
+
+#: includes/class-delete-all.php:124
+msgid "Success! The trash will be emptied soon."
+msgstr ""
+
+#: includes/class-delete-all.php:127
+msgid "A request to empty the trash is already pending for this post type."
+msgstr ""
+
+#: includes/class-delete-all.php:132
+msgid "A pending request to empty the trash will be processed soon."
+msgstr ""
 
 #. Plugin Name of the plugin/theme
 msgid "Bulk Edit Cron Offload"
