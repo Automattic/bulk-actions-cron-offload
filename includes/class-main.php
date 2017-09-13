@@ -95,7 +95,7 @@ class Main extends Singleton {
 
 		// Now what?
 		switch ( $this->action ) {
-			case 'delete_all' :
+			case 'delete_all':
 				break;
 
 			case 'trash':
