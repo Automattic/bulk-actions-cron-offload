@@ -10,7 +10,6 @@ namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 class Main {
 	/**
 	 * Prefix for bulk-process hook invoked by request-specific classes
-
 	 */
 	const ACTION = 'a8c_bulk_edit_cron_';
 
