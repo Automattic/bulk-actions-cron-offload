@@ -2,10 +2,10 @@
 /**
  * Offload "Empty Trash"
  *
- * @package Bulk_Edit_Cron_Offload
+ * @package Bulk_Actions_Cron_Offload
  */
 
-namespace Automattic\WP\Bulk_Edit_Cron_Offload;
+namespace Automattic\WP\Bulk_Actions_Cron_Offload;
 
 /**
  * Class Delete_All
@@ -16,7 +16,7 @@ class Delete_All {
 	 */
 	const ACTION = 'delete_all';
 
-	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_deleted_all';
+	const ADMIN_NOTICE_KEY = 'bulk_actions_cron_offload_deleted_all';
 
 	/**
 	 * Register this bulk process' hooks
@@ -102,9 +102,9 @@ class Delete_All {
 			}
 
 			$results = compact( 'deleted', 'locked', 'auth_error', 'error' );
-			do_action( 'bulk_edit_cron_offload_delete_all_request_completed', $results, $vars );
+			do_action( 'bulk_actions_cron_offload_delete_all_request_completed', $results, $vars );
 		} else {
-			do_action( 'bulk_edit_cron_offload_delete_all_request_no_posts', $post_ids, $vars );
+			do_action( 'bulk_actions_cron_offload_delete_all_request_no_posts', $post_ids, $vars );
 		}
 	}
 
@@ -120,15 +120,15 @@ class Delete_All {
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
 				$type    = 'success';
-				$message = __( 'Success! The trash will be emptied shortly.', 'bulk-edit-cron-offload' );
+				$message = __( 'Success! The trash will be emptied shortly.', 'bulk-actions-cron-offload' );
 			} else {
 				$type    = 'error';
-				$message = __( 'A request to empty the trash is already pending for this post type.', 'bulk-edit-cron-offload' );
+				$message = __( 'A request to empty the trash is already pending for this post type.', 'bulk-actions-cron-offload' );
 			}
 		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( Main::get_action_next_scheduled( self::ACTION, $screen->post_type ) ) {
 				$type    = 'warning';
-				$message = __( 'A pending request to empty the trash will be processed soon.', 'bulk-edit-cron-offload' );
+				$message = __( 'A pending request to empty the trash will be processed soon.', 'bulk-actions-cron-offload' );
 			}
 		}
 

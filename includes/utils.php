@@ -2,10 +2,10 @@
 /**
  * Plugin utilities
  *
- * @package Bulk_Edit_Cron_Offload
+ * @package Bulk_Actions_Cron_Offload
  */
 
-namespace Automattic\WP\Bulk_Edit_Cron_Offload;
+namespace Automattic\WP\Bulk_Actions_Cron_Offload;
 
 /**
  * Free memory

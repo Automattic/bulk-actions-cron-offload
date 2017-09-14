@@ -2,10 +2,10 @@
 /**
  * Offload "Move to Trash"
  *
- * @package Bulk_Edit_Cron_Offload
+ * @package Bulk_Actions_Cron_Offload
  */
 
-namespace Automattic\WP\Bulk_Edit_Cron_Offload;
+namespace Automattic\WP\Bulk_Actions_Cron_Offload;
 
 /**
  * Class Move_To_Trash
@@ -16,7 +16,7 @@ class Move_To_Trash {
 	 */
 	const ACTION = 'trash';
 
-	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_move_to_trash';
+	const ADMIN_NOTICE_KEY = 'bulk_actions_cron_offload_move_to_trash';
 
 	/**
 	 * Register this bulk process' hooks
@@ -90,9 +90,9 @@ class Move_To_Trash {
 			}
 
 			$results = compact( 'trashed', 'locked', 'auth_error', 'error' );
-			do_action( 'bulk_edit_cron_offload_move_to_trash_request_completed', $results, $vars );
+			do_action( 'bulk_actions_cron_offload_move_to_trash_request_completed', $results, $vars );
 		} else {
-			do_action( 'bulk_edit_cron_offload_move_to_trash_request_no_posts', $vars->posts, $vars );
+			do_action( 'bulk_actions_cron_offload_move_to_trash_request_no_posts', $vars->posts, $vars );
 		}
 	}
 
@@ -108,10 +108,10 @@ class Move_To_Trash {
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
 				$type    = 'success';
-				$message = __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-edit-cron-offload' );
+				$message = __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-actions-cron-offload' );
 			} else {
 				$type    = 'error';
-				$message = __( 'The selected posts are already scheduled to be moved to the trash.', 'bulk-edit-cron-offload' );
+				$message = __( 'The selected posts are already scheduled to be moved to the trash.', 'bulk-actions-cron-offload' );
 			}
 		} elseif ( 'edit' === $screen->base ) {
 			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
@@ -123,7 +123,7 @@ class Move_To_Trash {
 
 			if ( ! empty( $pending ) ) {
 				$type    = 'warning';
-				$message = __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-edit-cron-offload' );
+				$message = __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-actions-cron-offload' );
 			}
 		}
 

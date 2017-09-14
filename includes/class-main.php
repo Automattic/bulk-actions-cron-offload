@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin's main class, dispatcher for specific bulk-edit requests
+ * Plugin's main class, dispatcher for specific bulk-action requests
  *
- * @package Bulk_Edit_Cron_Offload
+ * @package Bulk_Actions_Cron_Offload
  */
 
-namespace Automattic\WP\Bulk_Edit_Cron_Offload;
+namespace Automattic\WP\Bulk_Actions_Cron_Offload;
 
 /**
  * Class Main
@@ -14,12 +14,12 @@ class Main {
 	/**
 	 * Prefix for bulk-process hook invoked by request-specific classes
 	 */
-	const ACTION = 'a8c_bulk_edit_cron_';
+	const ACTION = 'bulk_actions_cron_offload_';
 
 	/**
 	 * Common cron action
 	 */
-	const CRON_EVENT = 'bulk_edit_cron_offload';
+	const CRON_EVENT = 'bulk_actions_cron_offload';
 
 	/**
 	 * Register actions
@@ -69,7 +69,7 @@ class Main {
 	}
 
 	/**
-	 * Determine if current request is a bulk edit
+	 * Determine if current request is a bulk action
 	 */
 	private static function should_intercept_request() {
 		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
@@ -221,7 +221,7 @@ class Main {
 	public static function do_admin_redirect( $return_key, $succeeded = false, $extra_keys = array() ) {
 		$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
 
-		// Remove arguments that could re-trigger this bulk-edit.
+		// Remove arguments that could re-trigger this bulk action.
 		$action_keys = array( '_wp_http_referer', '_wpnonce', 'action', 'action2' );
 		$action_keys = array_merge( $action_keys, $extra_keys );
 		$redirect    = remove_query_arg( $action_keys, $redirect );

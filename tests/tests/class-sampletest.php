@@ -2,7 +2,7 @@
 /**
  * Class SampleTest
  *
- * @package Bulk_Edit_Cron_Offload
+ * @package Bulk_Actions_Cron_Offload
  */
 
 /**

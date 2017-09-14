@@ -2,10 +2,10 @@
 /**
  * Offload "Restore from Trash"
  *
- * @package Bulk_Edit_Cron_Offload
+ * @package Bulk_Actions_Cron_Offload
  */
 
-namespace Automattic\WP\Bulk_Edit_Cron_Offload;
+namespace Automattic\WP\Bulk_Actions_Cron_Offload;
 
 /**
  * Class Restore_From_Trash
@@ -16,7 +16,7 @@ class Restore_From_Trash {
 	 */
 	const ACTION = 'untrash';
 
-	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_restore_from_trash';
+	const ADMIN_NOTICE_KEY = 'bulk_actions_cron_offload_restore_from_trash';
 
 	/**
 	 * Register this bulk process' hooks
@@ -90,9 +90,9 @@ class Restore_From_Trash {
 			}
 
 			$results = compact( 'restored', 'locked', 'auth_error', 'error' );
-			do_action( 'bulk_edit_cron_offload_restore_from_trash_request_completed', $results, $vars );
+			do_action( 'bulk_actions_cron_offload_restore_from_trash_request_completed', $results, $vars );
 		} else {
-			do_action( 'bulk_edit_cron_offload_restore_from_trash_request_no_posts', $vars->posts, $vars );
+			do_action( 'bulk_actions_cron_offload_restore_from_trash_request_no_posts', $vars->posts, $vars );
 		}
 	}
 
@@ -108,15 +108,15 @@ class Restore_From_Trash {
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
 				$type    = 'success';
-				$message = __( 'Success! The selected posts will be restored shortly.', 'bulk-edit-cron-offload' );
+				$message = __( 'Success! The selected posts will be restored shortly.', 'bulk-actions-cron-offload' );
 			} else {
 				$type    = 'error';
-				$message = __( 'The selected posts are already scheduled to be restored.', 'bulk-edit-cron-offload' );
+				$message = __( 'The selected posts are already scheduled to be restored.', 'bulk-actions-cron-offload' );
 			}
 		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, 'trash' ) ) {
 				$type    = 'warning';
-				$message = __( 'Some items that would normally be shown here are waiting to be restored from the trash. These items are hidden until they are restored.', 'bulk-edit-cron-offload' );
+				$message = __( 'Some items that would normally be shown here are waiting to be restored from the trash. These items are hidden until they are restored.', 'bulk-actions-cron-offload' );
 			}
 		}
 

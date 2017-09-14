@@ -9,7 +9,7 @@ module.exports = function( grunt ) {
 
 		addtextdomain: {
 			options: {
-				textdomain: 'bulk-edit-cron-offload',
+				textdomain: 'bulk-actions-cron-offload',
 			},
 			update_all_domains: {
 				options: {
@@ -31,8 +31,8 @@ module.exports = function( grunt ) {
 			target: {
 				options: {
 					domainPath: '/languages',
-					mainFile: 'bulk-edit-cron-offload.php',
-					potFilename: 'bulk-edit-cron-offload.pot',
+					mainFile: 'bulk-actions-cron-offload.php',
+					potFilename: 'bulk-actions-cron-offload.pot',
 					potHeaders: {
 						poedit: true,
 						'x-poedit-keywordslist': true
