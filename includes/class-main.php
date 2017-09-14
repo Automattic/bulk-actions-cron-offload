@@ -245,17 +245,18 @@ class Main {
 	 * @param array  $extra_keys  Optional. Array of additional action keys to remove from redirect URL.
 	 */
 	public static function do_admin_redirect( $return_key, $succeeded = false, $extra_keys = array() ) {
-		$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
+		$redirect = wp_get_referer();
+
+		if ( ! $redirect ) {
+			$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
+			$redirect = remove_query_arg( array( '_wp_http_referer', '_wpnonce' ), $redirect );
+		}
 
 		// Remove arguments that could re-trigger this bulk action.
-		$action_keys = array( '_wp_http_referer', '_wpnonce', 'action', 'action2', 'bulk_edit' );
+		// Taken from wp-admin/edit.php.
+		$action_keys = array( 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' );
 		$action_keys = array_merge( $action_keys, $extra_keys );
 		$redirect    = remove_query_arg( $action_keys, $redirect );
-
-		// Also remove bulk action's arguments, to avoid a resubmit
-		$args = array( 'post', 'sticky', '_status' );
-		$args = array_merge( $args, self::get_supported_vars() );
-		$redirect = remove_query_arg( $args, $redirect );
 
 		// Add a flag for the admin notice.
 		$redirect = add_query_arg( $return_key, $succeeded ? 1 : -1, $redirect );
