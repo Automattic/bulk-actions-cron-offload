@@ -151,10 +151,10 @@ class Main {
 	 */
 	public static function bulk_action_allowed( $action ) {
 		$allowed_actions = array(
-			'delete', // TODO: "Delete permantently" in Trash.
+			'delete', // class Delete_Permanently.
 			'delete_all', // class Delete_All.
 			'edit',
-			'trash', // class Move_To_trash.
+			'trash', // class Move_To_Trash.
 			'untrash', // class Restore_From_Trash.
 		);
 
@@ -257,7 +257,7 @@ class Main {
 	/**
 	 * Find the next scheduled instance of a given action, regardless of arguments
 	 *
-     * @param string $bulk_action Bulk action to filter by.
+	 * @param string $bulk_action Bulk action to filter by.
 	 * @param  string $post_type Post type hook is scheduled for.
 	 * @return array
 	 */

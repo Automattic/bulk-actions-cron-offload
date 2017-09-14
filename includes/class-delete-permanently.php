@@ -1,6 +1,6 @@
 <?php
 /**
- * Offload "Move to Trash"
+ * Offload "Delete Permanently"
  *
  * @package Bulk_Edit_Cron_Offload
  */
@@ -8,15 +8,15 @@
 namespace Automattic\WP\Bulk_Edit_Cron_Offload;
 
 /**
- * Class Move_To_Trash
+ * Class Delete_Permanently
  */
-class Move_To_Trash {
+class Delete_Permanently {
 	/**
 	 * Class constants
 	 */
-	const ACTION = 'trash';
+	const ACTION = 'delete';
 
-	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_move_to_trash';
+	const ADMIN_NOTICE_KEY = 'bulk_edit_cron_offload_delete_permanently';
 
 	/**
 	 * Register this bulk process' hooks
@@ -26,11 +26,11 @@ class Move_To_Trash {
 		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
-		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_move' ), 999, 2 );
+		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_delete' ), 999, 2 );
 	}
 
 	/**
-	 * Handle a request to move some posts to the trash
+	 * Handle a request to delete selected posts from the trash
 	 *
 	 * @param object $vars Bulk-request variables.
 	 */
@@ -56,13 +56,13 @@ class Move_To_Trash {
 		if ( is_array( $vars->posts ) && ! empty( $vars->posts ) ) {
 			require_once ABSPATH . '/wp-admin/includes/post.php';
 
-			$trashed    = array();
+			$deleted    = array();
 			$locked     = array();
 			$auth_error = array();
 			$error      = array();
 
 			foreach ( $vars->posts as $post_id ) {
-				// Can the user trash this post?
+				// Can the user delete this post?
 				if ( ! user_can( $vars->user_id, 'delete_post', $post_id ) ) {
 					$auth_error[] = $post_id;
 					continue;
@@ -74,10 +74,10 @@ class Move_To_Trash {
 					continue;
 				}
 
-				// Try trashing.
-				$post_trashed = wp_trash_post( $post_id );
-				if ( $post_trashed ) {
-					$trashed[] = $post_id;
+				// Try deleting.
+				$post_deleted = wp_delete_post( $post_id );
+				if ( $post_deleted ) {
+					$deleted[] = $post_id;
 				} else {
 					$error[] = $post_id;
 				}
@@ -89,7 +89,7 @@ class Move_To_Trash {
 				}
 			}
 
-			$results = compact( 'trashed', 'locked', 'auth_error', 'error' );
+			$results = compact( 'deleted', 'locked', 'auth_error', 'error' );
 			do_action( 'bulk_edit_cron_offload_move_to_trash_request_completed', $results, $vars );
 		} else {
 			do_action( 'bulk_edit_cron_offload_move_to_trash_request_no_posts', $vars->posts, $vars );
@@ -108,22 +108,15 @@ class Move_To_Trash {
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
 			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
 				$type    = 'success';
-				$message = __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-edit-cron-offload' );
+				$message = __( 'Success! The selected posts will be deleted shortly.', 'bulk-edit-cron-offload' );
 			} else {
 				$type    = 'error';
-				$message = __( 'The selected posts are already scheduled to be moved to the trash.', 'bulk-edit-cron-offload' );
+				$message = __( 'The selected posts are already scheduled to be deleted.', 'bulk-edit-cron-offload' );
 			}
-		} elseif ( 'edit' === $screen->base ) {
-			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
-				return;
-			}
-
-			$status  = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
-			$pending = Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, $status );
-
-			if ( ! empty( $pending ) ) {
+		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
+			if ( Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, 'trash' ) ) {
 				$type    = 'warning';
-				$message = __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-edit-cron-offload' );
+				$message = __( 'Some items that would normally be shown here are waiting to be deleted permanently. These items are hidden until then.', 'bulk-edit-cron-offload' );
 			}
 		}
 
@@ -131,13 +124,13 @@ class Move_To_Trash {
 	}
 
 	/**
-	 * When a move is pending for a given post type, hide those posts in the admin
+	 * When a delete is pending for a given post type, hide those posts in the admin
 	 *
 	 * @param string $where Posts' WHERE clause.
 	 * @param object $q WP_Query object.
 	 * @return string
 	 */
-	public static function hide_posts_pending_move( $where, $q ) {
+	public static function hide_posts_pending_delete( $where, $q ) {
 		if ( ! is_admin() || ! $q->is_main_query() ) {
 			return $where;
 		}
@@ -146,7 +139,7 @@ class Move_To_Trash {
 			return $where;
 		}
 
-		if ( 'trash' === $q->get( 'post_status' ) ) {
+		if ( 'trash' !== $q->get( 'post_status' ) ) {
 			return $where;
 		}
 
@@ -161,4 +154,4 @@ class Move_To_Trash {
 	}
 }
 
-Move_To_Trash::register_hooks();
+Delete_Permanently::register_hooks();
