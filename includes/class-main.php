@@ -255,6 +255,48 @@ class Main {
 	}
 
 	/**
+	 * Find the next scheduled instance of a given action, regardless of arguments
+	 *
+     * @param string $bulk_action Bulk action to filter by.
+	 * @param  string $post_type Post type hook is scheduled for.
+	 * @return array
+	 */
+	public static function get_action_next_scheduled( $bulk_action, $post_type ) {
+		$events = get_option( 'cron' );
+
+		if ( ! is_array( $events ) ) {
+			return array();
+		}
+
+		foreach ( $events as $timestamp => $timestamp_events ) {
+			// Skip non-event data that Core includes in the option.
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $timestamp_events as $action => $action_instances ) {
+				if ( self::CRON_EVENT !== $action ) {
+					continue;
+				}
+
+				foreach ( $action_instances as $instance => $instance_args ) {
+					$vars = array_shift( $instance_args['args'] );
+
+					if ( $bulk_action === $vars->action && $post_type === $vars->post_type ) {
+						return array(
+							'timestamp' => $timestamp,
+							'args'      => $vars,
+						);
+					}
+				}
+			}
+		}
+
+		// No matching event found.
+		return array();
+	}
+
+	/**
 	 * Gather pending events for given conditions
 	 *
 	 * @param string $bulk_action Bulk action to filter by.
