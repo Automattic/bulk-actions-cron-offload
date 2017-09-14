@@ -74,7 +74,6 @@ class Edit {
 		}
 		unset( $request_array['post_sticky'] );
 
-		// Post status uses a special key.
 		if ( is_null( $request_array['post_status'] ) || 'all' === $request_array['post_status'] ) {
 			$request_array['_status'] = -1;
 		} else {
