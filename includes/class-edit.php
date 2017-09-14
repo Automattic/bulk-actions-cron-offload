@@ -63,6 +63,7 @@ class Edit {
 		// `bulk_edit_posts()` takes an array, normally `$_REQUEST`, so we convert back.
 		$request_array = get_object_vars( $vars );
 		unset( $request_array['action'] );
+		unset( $request_array['user_id'] );
 
 		// Modify some keys to match `bulk_edit_post()`'s expectations.
 		$request_array['post'] = $request_array['posts'];
@@ -70,8 +71,8 @@ class Edit {
 
 		if ( ! is_null( $request_array['post_sticky'] ) ) {
 			$request_array['sticky'] = $request_array['post_sticky'];
-			unset( $request_array['post_sticky'] );
 		}
+		unset( $request_array['post_sticky'] );
 
 		// Post status uses a special key.
 		if ( is_null( $request_array['post_status'] ) || 'all' === $request_array['post_status'] ) {
