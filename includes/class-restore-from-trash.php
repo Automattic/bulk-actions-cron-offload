@@ -113,18 +113,12 @@ class Restore_From_Trash {
 				$type    = 'error';
 				$message = __( 'The selected posts are already scheduled to be restored.', 'bulk-edit-cron-offload' );
 			}
-		} //elseif ( 'edit' === $screen->base ) {
-//			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
-//				return;
-//			}
-//
-//			$status = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
-//
-//			if ( Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, $status ) ) {
-//				$type    = 'warning';
-//				$message = __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-edit-cron-offload' );
-//			}
-//		}
+		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
+			if ( Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, 'trash' ) ) {
+				$type    = 'warning';
+				$message = __( 'Some items that would normally be shown here are waiting to be restored from the trash. These items are hidden until they are restored.', 'bulk-edit-cron-offload' );
+			}
+		}
 
 		Main::render_admin_notice( $type, $message );
 	}
