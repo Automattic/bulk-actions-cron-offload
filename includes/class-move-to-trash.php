@@ -118,9 +118,10 @@ class Move_To_Trash {
 				return;
 			}
 
-			$status = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
+			$status  = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
+			$pending = Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, $status );
 
-			if ( self::get_all_pending_actions( $screen->post_type, $status ) ) {
+			if ( ! empty( $pending ) ) {
 				$type    = 'warning';
 				$message = __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-edit-cron-offload' );
 			}
@@ -149,7 +150,7 @@ class Move_To_Trash {
 			return $where;
 		}
 
-		$post__not_in = self::get_post_ids_pending_move( $q->get( 'post_type' ), $q->get( 'post_status' ) );
+		$post__not_in = Main::get_post_ids_for_pending_events( self::ACTION, $q->get( 'post_type' ), $q->get( 'post_status' ) );
 
 		if ( ! empty( $post__not_in ) ) {
 			$post__not_in = implode( ',', $post__not_in );
@@ -157,76 +158,6 @@ class Move_To_Trash {
 		}
 
 		return $where;
-	}
-
-	/**
-	 * Gather all pending events for a given post type
-	 *
-	 * @param string $post_type Post type needing exclusion.
-	 * @param string $post_status Post status to filter by.
-	 * @return array
-	 */
-	private static function get_all_pending_actions( $post_type, $post_status ) {
-		$events = get_option( 'cron' );
-
-		if ( ! is_array( $events ) ) {
-			return array();
-		}
-
-		$ids = array();
-
-		foreach ( $events as $timestamp => $timestamp_events ) {
-			// Skip non-event data that Core includes in the option.
-			if ( ! is_numeric( $timestamp ) ) {
-				continue;
-			}
-
-			foreach ( $timestamp_events as $action => $action_instances ) {
-				if ( Main::CRON_EVENT !== $action ) {
-					continue;
-				}
-
-				foreach ( $action_instances as $instance => $instance_args ) {
-					$vars = array_shift( $instance_args['args'] );
-
-					if ( self::ACTION === $vars->action && $post_type === $vars->post_type ) {
-						if ( $post_status === $vars->post_status || 'all' === $vars->post_status || 'all' === $post_status ) {
-							$ids[] = array(
-								'timestamp' => $timestamp,
-								'args'      => $vars,
-							);
-						}
-					}
-				}
-			}
-		}
-
-		return $ids;
-	}
-
-	/**
-	 * Gather IDs of objects pending move to trash, with given post type
-	 *
-	 * @param string $post_type Post type needing exclusion.
-	 * @param string $post_status Post status to filter by.
-	 * @return array
-	 */
-	private static function get_post_ids_pending_move( $post_type, $post_status ) {
-		$events = wp_list_pluck( self::get_all_pending_actions( $post_type, $post_status ), 'args' );
-		$events = wp_list_pluck( $events, 'posts' );
-
-		$ids = array();
-
-		foreach ( $events as $ids_to_merge ) {
-			$ids = array_merge( $ids, $ids_to_merge );
-		}
-
-		if ( ! empty( $ids ) ) {
-			$ids = array_map( 'absint', $ids );
-			$ids = array_unique( $ids );
-		}
-
-		return $ids;
 	}
 }
 

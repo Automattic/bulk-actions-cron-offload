@@ -253,6 +253,78 @@ class Main {
 		</div>
 		<?php
 	}
+
+	/**
+	 * Gather pending events for given conditions
+	 *
+	 * @param string $bulk_action Bulk action to filter by.
+	 * @param string $post_type Post type needing exclusion.
+	 * @param string $post_status Post status to filter by.
+	 * @return array
+	 */
+	public static function get_all_pending_events_for_action( $bulk_action, $post_type, $post_status ) {
+		$events = get_option( 'cron' );
+
+		if ( ! is_array( $events ) ) {
+			return array();
+		}
+
+		$ids = array();
+
+		foreach ( $events as $timestamp => $timestamp_events ) {
+			// Skip non-event data that Core includes in the option.
+			if ( ! is_numeric( $timestamp ) ) {
+				continue;
+			}
+
+			foreach ( $timestamp_events as $action => $action_instances ) {
+				if ( self::CRON_EVENT !== $action ) {
+					continue;
+				}
+
+				foreach ( $action_instances as $instance => $instance_args ) {
+					$vars = array_shift( $instance_args['args'] );
+
+					if ( $bulk_action === $vars->action && $post_type === $vars->post_type ) {
+						if ( $post_status === $vars->post_status || 'all' === $vars->post_status || 'all' === $post_status ) {
+							$ids[] = array(
+								'timestamp' => $timestamp,
+								'args'      => $vars,
+							);
+						}
+					}
+				}
+			}
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Gather IDs of objects for given conditions
+	 *
+     * @param string $bulk_action Bulk action to filter by.
+	 * @param string $post_type Post type needing exclusion.
+	 * @param string $post_status Post status to filter by.
+	 * @return array
+	 */
+	public static function get_post_ids_for_pending_events( $bulk_action, $post_type, $post_status ) {
+		$events = wp_list_pluck( self::get_all_pending_events_for_action( $bulk_action, $post_type, $post_status ), 'args' );
+		$events = wp_list_pluck( $events, 'posts' );
+
+		$ids = array();
+
+		foreach ( $events as $ids_to_merge ) {
+			$ids = array_merge( $ids, $ids_to_merge );
+		}
+
+		if ( ! empty( $ids ) ) {
+			$ids = array_map( 'absint', $ids );
+			$ids = array_unique( $ids );
+		}
+
+		return $ids;
+	}
 }
 
 Main::load();
