@@ -154,7 +154,7 @@ class Main {
 			'delete', // class Delete_Permanently.
 			'delete_all', // class Delete_All.
 			'edit',
-			'trash', // class Move_To_trash.
+			'trash', // class Move_To_Trash.
 			'untrash', // class Restore_From_Trash.
 		);
 

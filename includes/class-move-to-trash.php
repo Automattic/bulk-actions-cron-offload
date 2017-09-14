@@ -102,7 +102,7 @@ class Move_To_Trash {
 	public static function admin_notices() {
 		$screen = get_current_screen();
 
-		$type   = '';
+		$type    = '';
 		$message = '';
 
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {

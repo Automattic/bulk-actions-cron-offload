@@ -102,7 +102,7 @@ class Delete_Permanently {
 	public static function admin_notices() {
 		$screen = get_current_screen();
 
-		$type   = '';
+		$type    = '';
 		$message = '';
 
 		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
@@ -139,7 +139,7 @@ class Delete_Permanently {
 			return $where;
 		}
 
-		if ( 'trash' === $q->get( 'post_status' ) ) {
+		if ( 'trash' !== $q->get( 'post_status' ) ) {
 			return $where;
 		}
 
