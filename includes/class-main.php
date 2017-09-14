@@ -303,7 +303,7 @@ class Main {
 	/**
 	 * Gather IDs of objects for given conditions
 	 *
-     * @param string $bulk_action Bulk action to filter by.
+	 * @param string $bulk_action Bulk action to filter by.
 	 * @param string $post_type Post type needing exclusion.
 	 * @param string $post_status Post status to filter by.
 	 * @return array
