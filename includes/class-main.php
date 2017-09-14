@@ -268,9 +268,14 @@ class Main {
 		$redirect = wp_unslash( $_SERVER['REQUEST_URI'] );
 
 		// Remove arguments that could re-trigger this bulk action.
-		$action_keys = array( '_wp_http_referer', '_wpnonce', 'action', 'action2' );
+		$action_keys = array( '_wp_http_referer', '_wpnonce', 'action', 'action2', 'bulk_edit' );
 		$action_keys = array_merge( $action_keys, $extra_keys );
 		$redirect    = remove_query_arg( $action_keys, $redirect );
+
+		// Also remove bulk action's arguments, to avoid a resubmit
+		$args = array( 'post', 'sticky', '_status' );
+		$args = array_merge( $args, self::get_supported_vars() );
+		$redirect = remove_query_arg( $args, $redirect );
 
 		// Add a flag for the admin notice.
 		$redirect = add_query_arg( $return_key, $succeeded ? 1 : -1, $redirect );
