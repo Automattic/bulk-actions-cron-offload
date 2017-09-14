@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Bulk Actions Cron Offload 1.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/bulk-actions-cron-offload\n"
-"POT-Creation-Date: 2017-09-14 18:55:07+00:00\n"
+"POT-Creation-Date: 2017-09-14 22:18:30+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -49,6 +49,20 @@ msgstr ""
 msgid ""
 "Some items that would normally be shown here are waiting to be deleted "
 "permanently. These items are hidden until then."
+msgstr ""
+
+#: includes/class-edit.php:112
+msgid "Success! The selected posts will be edited shortly."
+msgstr ""
+
+#: includes/class-edit.php:115
+msgid "The requested edits are already pending for the chosen posts."
+msgstr ""
+
+#: includes/class-edit.php:127
+msgid ""
+"Some items that would normally be shown here are waiting to be edited. "
+"These items are hidden until they are processed."
 msgstr ""
 
 #: includes/class-move-to-trash.php:111
