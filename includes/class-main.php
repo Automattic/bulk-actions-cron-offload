@@ -87,7 +87,8 @@ class Main {
 	 * Capture relevant variables
 	 */
 	private static function capture_vars() {
-		$vars = (object) array_fill_keys( array( 'user_id', 'action', 'post_type', 'posts', 'tax_input', 'post_author', 'comment_status', 'ping_status', 'post_status', 'post_sticky', 'post_format' ), null );
+		$vars = array_merge( array( 'action', 'user_id' ), self::get_supported_vars() );
+		$vars = (object) array_fill_keys( $vars, null );
 
 		$vars->user_id = get_current_user_id();
 
@@ -109,6 +110,10 @@ class Main {
 
 		if ( isset( $_REQUEST['tax_input'] ) && is_array( $_REQUEST['tax_input'] ) ) {
 			$vars->tax_input = $_REQUEST['tax_input'];
+		}
+
+		if ( isset( $_REQUEST['post_category'] ) && is_array( $_REQUEST['post_category'] ) ) {
+			$vars->post_category = $_REQUEST['post_category'];
 		}
 
 		if ( isset( $_REQUEST['post_author'] ) && -1 !== (int) $_REQUEST['post_author'] ) {
@@ -135,12 +140,53 @@ class Main {
 			$vars->post_format = $_REQUEST['post_format'];
 		}
 
+		if ( isset( $_REQUEST['post_parent'] ) && '-1' !== $_REQUEST['post_parent'] ) {
+			$vars->post_parent = (int) $_REQUEST['post_parent'];
+		}
+
+		if ( isset( $_REQUEST['page_template'] ) && '-1' !== $_REQUEST['page_template'] ) {
+			$vars->page_template = $_REQUEST['page_template'];
+		}
+
+		if ( isset( $_REQUEST['post_password'] ) && ! empty( $_REQUEST['post_password'] ) ) {
+			$vars->post_password = $_REQUEST['post_password'];
+		}
+
 		// Post status is special.
 		if ( is_null( $vars->post_status ) && isset( $_REQUEST['post_status'] ) && ! empty( $_REQUEST['post_status'] ) ) {
 			$vars->post_status = $_REQUEST['post_status'];
 		}
 
+		// Another special case, dependent on post status.
+		if ( isset( $_REQUEST['keep_private'] ) && 'private' === $vars->post_status ) {
+			$vars->keep_private = true;
+		}
+
 		return $vars;
+	}
+
+	/**
+	 * List allowed $_REQUEST variables
+	 *
+	 * @return array
+	 */
+	private static function get_supported_vars() {
+		return array(
+			'comment_status',
+			'keep_private',
+			'page_template',
+			'ping_status',
+			'post_author',
+			'post_category',
+			'post_format',
+			'post_parent',
+			'post_password',
+			'post_status',
+			'post_sticky',
+			'post_type',
+			'posts',
+			'tax_input',
+		);
 	}
 
 	/**
@@ -153,7 +199,7 @@ class Main {
 		$allowed_actions = array(
 			'delete', // class Delete_Permanently.
 			'delete_all', // class Delete_All.
-			'edit',
+			'edit', // class Edit.
 			'trash', // class Move_To_Trash.
 			'untrash', // class Restore_From_Trash.
 		);

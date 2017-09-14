@@ -21,5 +21,6 @@ require __DIR__ . '/includes/utils.php';
 require __DIR__ . '/includes/class-main.php';
 require __DIR__ . '/includes/class-delete-all.php';
 require __DIR__ . '/includes/class-delete-permanently.php';
+require __DIR__ . '/includes/class-edit.php';
 require __DIR__ . '/includes/class-move-to-trash.php';
 require __DIR__ . '/includes/class-restore-from-trash.php';
