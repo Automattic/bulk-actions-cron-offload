@@ -151,11 +151,11 @@ class Main {
 	 */
 	public static function bulk_action_allowed( $action ) {
 		$allowed_actions = array(
-			'delete',
-			'delete_all',
+			'delete', // TODO: "Delete permantently" in Trash.
+			'delete_all', // class Delete_All.
 			'edit',
-			'trash',
-			'untrash',
+			'trash', // class Move_To_trash.
+			'untrash', // class Restore_From_Trash.
 		);
 
 		return in_array( $action, $allowed_actions, true );
