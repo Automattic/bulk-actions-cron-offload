@@ -125,14 +125,6 @@ class Restore_From_Trash {
 	 * @return string
 	 */
 	public static function hide_posts( $where, $q ) {
-		if ( ! is_admin() || ! $q->is_main_query() ) {
-			return $where;
-		}
-
-		if ( 'edit' !== get_current_screen()->base ) {
-			return $where;
-		}
-
 		if ( 'trash' !== $q->get( 'post_status' ) ) {
 			return $where;
 		}

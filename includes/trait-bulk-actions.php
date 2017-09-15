@@ -29,9 +29,28 @@ trait Bulk_Actions {
 	public static function register_extra_hooks() {}
 
 	/**
+	 * When an edit is pending for a given post type, hide those posts in the admin
+	 *
+	 * @param string $where Posts' WHERE clause.
+	 * @param object $q WP_Query object.
+	 * @return string
+	 */
+	public static function hide_posts( $where, $q ) {
+		if ( ! is_admin() || ! $q->is_main_query() ) {
+			return $where;
+		}
+
+		if ( 'edit' !== get_current_screen()->base ) {
+			return $where;
+		}
+
+		return parent::hide_posts( $where, $q );
+	}
+
+	/**
 	 * Strip the custom notice key, otherwise it turns up in pagination and other unwanted places.
 	 *
-	 * @param array $args Array of one-time query args
+	 * @param array $args Array of one-time query args.
 	 * @return array
 	 */
 	public static function remove_notice_arg( $args ) {
