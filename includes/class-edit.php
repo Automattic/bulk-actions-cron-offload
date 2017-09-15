@@ -24,22 +24,6 @@ class Edit {
 	const ADMIN_NOTICE_KEY = 'bulk_actions_cron_offload_edit';
 
 	/**
-	 * Handle a request to edit some posts
-	 *
-	 * @param object $vars Bulk-request variables.
-	 */
-	public static function process( $vars ) {
-		$action_scheduled = Main::next_scheduled( $vars );
-
-		if ( empty( $action_scheduled ) ) {
-			Main::schedule_processing( $vars );
-			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true );
-		} else {
-			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
-		}
-	}
-
-	/**
 	 * Cron callback to edit requested items
 	 *
 	 * @param object $vars Bulk-request variables.

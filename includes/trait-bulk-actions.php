@@ -29,6 +29,22 @@ trait Bulk_Actions {
 	public static function register_extra_hooks() {}
 
 	/**
+	 * Process request
+	 *
+	 * @param object $vars Bulk-request variables.
+	 */
+	public static function process( $vars ) {
+		$action_scheduled = Main::next_scheduled( $vars );
+
+		if ( empty( $action_scheduled ) ) {
+			Main::schedule_processing( $vars );
+			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, true );
+		} else {
+			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
+		}
+	}
+
+	/**
 	 * When an edit is pending for a given post type, hide those posts in the admin
 	 *
 	 * @param string $where Posts' WHERE clause.
