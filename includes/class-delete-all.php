@@ -12,6 +12,11 @@ namespace Automattic\WP\Bulk_Actions_Cron_Offload;
  */
 class Delete_All {
 	/**
+	 * Common hooks and such
+	 */
+	use Bulk_Actions;
+
+	/**
 	 * Class constants
 	 */
 	const ACTION = 'delete_all';
@@ -19,16 +24,9 @@ class Delete_All {
 	const ADMIN_NOTICE_KEY = 'bulk_actions_cron_offload_deleted_all';
 
 	/**
-	 * Register this bulk process' hooks
+	 * Register this bulk process' custom hooks
 	 */
-	public static function register_hooks() {
-		add_action( Main::build_hook( self::ACTION ), array( __CLASS__, 'process' ) );
-		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
-
-		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
-		add_filter( 'posts_where', array( __CLASS__, 'hide_posts' ), 999, 2 );
-
-		// Limit when caps are intercepted, given frequent execution of the `map_meta_cap` filter.
+	public static function register_extra_hooks() {
 		add_action( 'load-edit.php', function() {
 			add_filter( 'map_meta_cap', array( __CLASS__, 'hide_empty_trash_pending_delete' ), 10, 2 );
 		} );
