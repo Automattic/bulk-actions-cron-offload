@@ -17,6 +17,11 @@ class Main {
 	const ACTION = 'bulk_actions_cron_offload_';
 
 	/**
+	 * Generic admin notices
+	 */
+	const ADMIN_NOTICE_KEY = 'bulk_actions_cron_offload_general';
+
+	/**
 	 * Common cron action
 	 */
 	const CRON_EVENT = 'bulk_actions_cron_offload';
@@ -28,6 +33,8 @@ class Main {
 		add_action( self::CRON_EVENT, array( __CLASS__, 'do_cron' ) );
 
 		add_action( 'load-edit.php', array( __CLASS__, 'intercept' ) );
+
+		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 	}
 
 	/**
@@ -57,6 +64,11 @@ class Main {
 
 		if ( ! self::bulk_action_allowed( $vars->action ) ) {
 			return;
+		}
+
+		// Nothing to do.
+		if ( empty( $vars->posts ) ) {
+			self::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
 		}
 
 		// Pass request to a class to handle offloading to cron, UX, etc.
@@ -205,6 +217,15 @@ class Main {
 		);
 
 		return in_array( $action, $allowed_actions, true );
+	}
+
+	/**
+	 * Let the user know what's going on
+	 */
+	public static function admin_notices() {
+		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) && '-1' === $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
+			self::render_admin_notice( 'error', __( 'The requested bulk action was not processed because no posts were selected.', 'bulk-actions-cron-offload' ) );
+		}
 	}
 
 	/**
