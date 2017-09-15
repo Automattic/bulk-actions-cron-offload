@@ -32,6 +32,7 @@ class Main {
 	public static function load() {
 		add_action( self::CRON_EVENT, array( __CLASS__, 'do_cron' ) );
 
+		// TODO: add for upload.php and edit-comments.php. Anything else?
 		add_action( 'load-edit.php', array( __CLASS__, 'intercept' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
@@ -62,13 +63,14 @@ class Main {
 		$vars   = self::capture_vars();
 		$action = self::build_hook( $vars->action );
 
-		if ( ! self::bulk_action_allowed( $vars->action ) ) {
-			return;
-		}
-
-		// Nothing to do, unless we're emptying the trash.
-		if ( empty( $vars->posts ) && 'delete_all' !== $vars->action ) {
-			self::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
+		// What kind of actions is this?
+		if ( self::is_core_action( $vars->action ) ) {
+			// Nothing to do, unless we're emptying the trash.
+			if ( empty( $vars->posts ) && 'delete_all' !== $vars->action ) {
+				self::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
+			}
+		} else {
+			// Do something special to offload custom things?
 		}
 
 		// Pass request to a class to handle offloading to cron, UX, etc.
@@ -99,11 +101,24 @@ class Main {
 	 * Capture relevant variables
 	 */
 	private static function capture_vars() {
-		$vars = array_merge( array( 'action', 'user_id' ), self::get_supported_vars() );
+		$vars = array( 'action', 'user_id', 'current_screen' ); // Extra data that normally would be available from the context.
+		$vars = array_merge( $vars, self::get_supported_vars() );
 		$vars = (object) array_fill_keys( $vars, null );
 
+		// All permissions checks must be re-implemented!
 		$vars->user_id = get_current_user_id();
 
+		// Some dynamic hooks need screen data, but we don't need help and other private data.
+		// Fortunately, Core's private convention is used in the \WP_Screen class.
+		$screen = get_current_screen();
+		$screen = get_object_vars( $screen );
+		$screen = array_filter( $screen, function( $key ) {
+			return 0 !== strpos( $key, '_' );
+		}, ARRAY_FILTER_USE_KEY );
+		$vars->current_screen = (object) $screen;
+		unset( $screen );
+
+		// Remainder of data comes from $_REQUEST
 		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
 			$vars->action = 'delete_all';
 		} elseif ( isset( $_REQUEST['action'] ) && '-1' !== $_REQUEST['action'] ) {
@@ -202,13 +217,13 @@ class Main {
 	}
 
 	/**
-	 * Validate action
+	 * Is this one of Core's default actions, or a custom action
 	 *
 	 * @param  string $action Action parsed from request vars.
 	 * @return bool
 	 */
-	public static function bulk_action_allowed( $action ) {
-		$allowed_actions = array(
+	public static function is_core_action( $action ) {
+		$core_actions = array(
 			'delete', // class Delete_Permanently.
 			'delete_all', // class Delete_All.
 			'edit', // class Edit.
@@ -216,7 +231,7 @@ class Main {
 			'untrash', // class Restore_From_Trash.
 		);
 
-		return in_array( $action, $allowed_actions, true );
+		return in_array( $action, $core_actions, true );
 	}
 
 	/**
