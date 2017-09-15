@@ -15,7 +15,7 @@ trait Bulk_Actions {
 		add_action( Main::build_hook( self::ACTION ), array( __CLASS__, 'process' ) );
 		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
 
-		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'render_admin_notices' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'hide_posts' ), 999, 2 );
 
 		add_filter( 'removable_query_args', array( __CLASS__, 'remove_notice_arg' ) );
@@ -42,6 +42,44 @@ trait Bulk_Actions {
 		} else {
 			Main::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
 		}
+	}
+
+	/**
+	 * Render the post-redirect notice, or hand off to class for other notices
+	 */
+	public static function render_admin_notices() {
+		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
+			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
+				$type    = 'success';
+				$message = self::admin_notice_success_message();
+			} else {
+				$type    = 'error';
+				$message = self::admin_notice_error_message();
+			}
+
+			Main::render_admin_notice( $type, $message );
+			return;
+		}
+
+		self::admin_notices();
+	}
+
+	/**
+	 * Provide translated success message for bulk action
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_success_message() {
+		return '';
+	}
+
+	/**
+	 * Provide translated error message for bulk action
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_error_message() {
+		return '';
 	}
 
 	/**

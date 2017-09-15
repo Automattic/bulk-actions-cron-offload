@@ -108,6 +108,8 @@ class Delete_All {
 
 	/**
 	 * Let the user know what's going on
+	 *
+	 * Not used for post-request redirect
 	 */
 	public static function admin_notices() {
 		$screen = get_current_screen();
@@ -115,15 +117,7 @@ class Delete_All {
 		$type    = '';
 		$message = '';
 
-		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
-			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$type    = 'success';
-				$message = __( 'Success! The trash will be emptied shortly.', 'bulk-actions-cron-offload' );
-			} else {
-				$type    = 'error';
-				$message = __( 'A request to empty the trash is already pending for this post type.', 'bulk-actions-cron-offload' );
-			}
-		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
+		if ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( Main::get_action_next_scheduled( self::ACTION, $screen->post_type ) ) {
 				$type    = 'warning';
 				$message = __( 'A pending request to empty the trash will be processed soon.', 'bulk-actions-cron-offload' );
@@ -131,6 +125,24 @@ class Delete_All {
 		}
 
 		Main::render_admin_notice( $type, $message );
+	}
+
+	/**
+	 * Provide post-redirect success message
+	 *
+	 * @retun string
+	 */
+	public static function admin_notice_success_message() {
+		return __( 'Success! The trash will be emptied shortly.', 'bulk-actions-cron-offload' );
+	}
+
+	/**
+	 * Provide post-redirect error message
+	 *
+	 * @retun string
+	 */
+	public static function admin_notice_error_message() {
+		return __( 'A request to empty the trash is already pending for this post type.', 'bulk-actions-cron-offload' );
 	}
 
 	/**

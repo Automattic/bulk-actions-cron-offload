@@ -77,6 +77,8 @@ class Edit {
 
 	/**
 	 * Let the user know what's going on
+	 *
+	 * Not used for post-request redirect
 	 */
 	public static function admin_notices() {
 		$screen = get_current_screen();
@@ -84,15 +86,7 @@ class Edit {
 		$type    = '';
 		$message = '';
 
-		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
-			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$type    = 'success';
-				$message = __( 'Success! The selected posts will be edited shortly.', 'bulk-actions-cron-offload' );
-			} else {
-				$type    = 'error';
-				$message = __( 'The requested edits are already pending for the chosen posts.', 'bulk-actions-cron-offload' );
-			}
-		} elseif ( 'edit' === $screen->base ) {
+		if ( 'edit' === $screen->base ) {
 			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 				return;
 			}
@@ -107,6 +101,24 @@ class Edit {
 		}
 
 		Main::render_admin_notice( $type, $message );
+	}
+
+	/**
+	 * Provide post-redirect success message
+	 *
+	 * @retun string
+	 */
+	public static function admin_notice_success_message() {
+		return __( 'Success! The selected posts will be edited shortly.', 'bulk-actions-cron-offload' );
+	}
+
+	/**
+	 * Provide post-redirect error message
+	 *
+	 * @retun string
+	 */
+	public static function admin_notice_error_message() {
+		return __( 'The requested edits are already pending for the chosen posts.', 'bulk-actions-cron-offload' );
 	}
 
 	/**

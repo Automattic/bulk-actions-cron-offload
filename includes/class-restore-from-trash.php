@@ -76,6 +76,8 @@ class Restore_From_Trash {
 
 	/**
 	 * Let the user know what's going on
+	 *
+	 * Not used for post-request redirect
 	 */
 	public static function admin_notices() {
 		$screen = get_current_screen();
@@ -83,15 +85,7 @@ class Restore_From_Trash {
 		$type    = '';
 		$message = '';
 
-		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
-			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$type    = 'success';
-				$message = __( 'Success! The selected posts will be restored shortly.', 'bulk-actions-cron-offload' );
-			} else {
-				$type    = 'error';
-				$message = __( 'The selected posts are already scheduled to be restored.', 'bulk-actions-cron-offload' );
-			}
-		} elseif ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
+		if ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, 'trash' ) ) {
 				$type    = 'warning';
 				$message = __( 'Some items that would normally be shown here are waiting to be restored from the trash. These items are hidden until they are restored.', 'bulk-actions-cron-offload' );
@@ -99,6 +93,24 @@ class Restore_From_Trash {
 		}
 
 		Main::render_admin_notice( $type, $message );
+	}
+
+	/**
+	 * Provide post-redirect success message
+	 *
+	 * @retun string
+	 */
+	public static function admin_notice_success_message() {
+		return __( 'Success! The selected posts will be restored shortly.', 'bulk-actions-cron-offload' );
+	}
+
+	/**
+	 * Provide post-redirect error message
+	 *
+	 * @retun string
+	 */
+	public static function admin_notice_error_message() {
+		return __( 'The selected posts are already scheduled to be restored.', 'bulk-actions-cron-offload' );
 	}
 
 	/**

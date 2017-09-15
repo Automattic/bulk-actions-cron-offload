@@ -76,6 +76,8 @@ class Move_To_Trash {
 
 	/**
 	 * Let the user know what's going on
+	 *
+	 * Not used for post-request redirect
 	 */
 	public static function admin_notices() {
 		$screen = get_current_screen();
@@ -83,15 +85,7 @@ class Move_To_Trash {
 		$type    = '';
 		$message = '';
 
-		if ( isset( $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) ) {
-			if ( 1 === (int) $_REQUEST[ self::ADMIN_NOTICE_KEY ] ) {
-				$type    = 'success';
-				$message = __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-actions-cron-offload' );
-			} else {
-				$type    = 'error';
-				$message = __( 'The selected posts are already scheduled to be moved to the trash.', 'bulk-actions-cron-offload' );
-			}
-		} elseif ( 'edit' === $screen->base ) {
+		if ( 'edit' === $screen->base ) {
 			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 				return;
 			}
@@ -106,6 +100,24 @@ class Move_To_Trash {
 		}
 
 		Main::render_admin_notice( $type, $message );
+	}
+
+	/**
+	 * Provide post-redirect success message
+	 *
+	 * @retun string
+	 */
+	public static function admin_notice_success_message() {
+		return __( 'Success! The selected posts will be moved to the trash shortly.', 'bulk-actions-cron-offload' );
+	}
+
+	/**
+	 * Provide post-redirect error message
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_error_message() {
+		return __( 'The selected posts are already scheduled to be moved to the trash.', 'bulk-actions-cron-offload' );
 	}
 
 	/**
