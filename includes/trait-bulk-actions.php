@@ -19,7 +19,7 @@ trait Bulk_Actions {
 		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'render_admin_notices' ) );
-		add_filter( 'posts_where', array( __CLASS__, 'hide_posts' ), 999, 2 );
+		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_common' ), 999, 2 );
 
 		add_filter( 'removable_query_args', array( __CLASS__, 'remove_notice_arg' ) );
 
@@ -123,13 +123,13 @@ trait Bulk_Actions {
 	}
 
 	/**
-	 * When an edit is pending for a given post type, hide those posts in the admin
+	 * When a process is pending for a given post type, hide those posts in the admin
 	 *
 	 * @param string $where Posts' WHERE clause.
 	 * @param object $q WP_Query object.
 	 * @return string
 	 */
-	public static function hide_posts( $where, $q ) {
+	public static function hide_posts_common( $where, $q ) {
 		if ( ! is_admin() || ! $q->is_main_query() ) {
 			return $where;
 		}
@@ -138,7 +138,29 @@ trait Bulk_Actions {
 			return $where;
 		}
 
-		return parent::hide_posts( $where, $q );
+		return self::hide_posts( $where, $q );
+	}
+
+	/**
+	 * Hide posts pending processing
+	 *
+	 * @param string $where Posts' WHERE clause.
+	 * @param object $q WP_Query object.
+	 * @return string
+	 */
+	public static function hide_posts( $where, $q ) {
+		if ( 'trash' === $q->get( 'post_status' ) ) {
+			return $where;
+		}
+
+		$post__not_in = Main::get_post_ids_for_pending_events( self::ACTION, $q->get( 'post_type' ), $q->get( 'post_status' ) );
+
+		if ( ! empty( $post__not_in ) ) {
+			$post__not_in = implode( ',', $post__not_in );
+			$where       .= ' AND ID NOT IN(' . $post__not_in . ')';
+		}
+
+		return $where;
 	}
 
 	/**
