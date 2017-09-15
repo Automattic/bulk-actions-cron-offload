@@ -68,6 +68,34 @@ trait Bulk_Actions {
 	}
 
 	/**
+	 * Let the user know what's going on
+	 *
+	 * Not used for post-request redirect
+	 */
+	public static function admin_notices() {
+		$screen = get_current_screen();
+
+		$type    = '';
+		$message = '';
+
+		if ( 'edit' === $screen->base ) {
+			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
+				return;
+			}
+
+			$status  = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
+			$pending = Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, $status );
+
+			if ( ! empty( $pending ) ) {
+				$type    = 'warning';
+				$message = self::admin_notice_hidden_pending_processing();
+			}
+		}
+
+		Main::render_admin_notice( $type, $message );
+	}
+
+	/**
 	 * Provide translated success message for bulk action
 	 *
 	 * @return string
@@ -82,6 +110,15 @@ trait Bulk_Actions {
 	 * @return string
 	 */
 	public static function admin_notice_error_message() {
+		return '';
+	}
+
+	/**
+	 * Provide translated message when posts are hidden pending processing
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_hidden_pending_processing() {
 		return '';
 	}
 

@@ -76,34 +76,6 @@ class Edit {
 	}
 
 	/**
-	 * Let the user know what's going on
-	 *
-	 * Not used for post-request redirect
-	 */
-	public static function admin_notices() {
-		$screen = get_current_screen();
-
-		$type    = '';
-		$message = '';
-
-		if ( 'edit' === $screen->base ) {
-			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
-				return;
-			}
-
-			$status  = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
-			$pending = Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, $status );
-
-			if ( ! empty( $pending ) ) {
-				$type    = 'warning';
-				$message = __( 'Some items that would normally be shown here are waiting to be edited. These items are hidden until they are processed.', 'bulk-actions-cron-offload' );
-			}
-		}
-
-		Main::render_admin_notice( $type, $message );
-	}
-
-	/**
 	 * Provide post-redirect success message
 	 *
 	 * @retun string
@@ -119,6 +91,15 @@ class Edit {
 	 */
 	public static function admin_notice_error_message() {
 		return __( 'The requested edits are already pending for the chosen posts.', 'bulk-actions-cron-offload' );
+	}
+
+	/**
+	 * Provide notice when posts are hidden pending edits
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_hidden_pending_processing() {
+		return __( 'Some items that would normally be shown here are waiting to be edited. These items are hidden until they are processed.', 'bulk-actions-cron-offload' );
 	}
 
 	/**
