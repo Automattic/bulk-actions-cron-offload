@@ -7,6 +7,9 @@
 
 namespace Automattic\WP\Bulk_Actions_Cron_Offload;
 
+/**
+ * Trait Bulk_Actions
+ */
 trait Bulk_Actions {
 	/**
 	 * Register this bulk process' hooks
