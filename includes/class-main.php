@@ -63,14 +63,12 @@ class Main {
 		$vars   = self::capture_vars();
 		$action = self::build_hook( $vars->action );
 
-		// What kind of actions is this?
+		// What kind of action is this?
 		if ( self::is_core_action( $vars->action ) ) {
 			// Nothing to do, unless we're emptying the trash.
 			if ( empty( $vars->posts ) && 'delete_all' !== $vars->action ) {
 				self::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
 			}
-		} else {
-			// Do something special to offload custom things?
 		}
 
 		// Pass request to a class to handle offloading to cron, UX, etc.
@@ -101,7 +99,7 @@ class Main {
 	 * Capture relevant variables
 	 */
 	private static function capture_vars() {
-		$vars = array( 'action', 'user_id', 'current_screen' ); // Extra data that normally would be available from the context.
+		$vars = array( 'action', 'custom_action', 'user_id', 'current_screen' ); // Extra data that normally would be available from the context.
 		$vars = array_merge( $vars, self::get_supported_vars() );
 		$vars = (object) array_fill_keys( $vars, null );
 
@@ -189,6 +187,12 @@ class Main {
 			$vars->keep_private = true;
 		}
 
+		// Standardize custom actions.
+		if ( ! self::is_core_action( $vars->action ) ) {
+			$vars->custom_action = $vars->action;
+			$vars->action        = 'custom';
+		}
+
 		return $vars;
 	}
 
@@ -250,6 +254,10 @@ class Main {
 	 * @return string
 	 */
 	public static function build_hook( $action ) {
+		if ( ! self::is_core_action( $action ) ) {
+			$action = 'custom';
+		}
+
 		return self::ACTION . $action;
 	}
 

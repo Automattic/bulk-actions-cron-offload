@@ -20,6 +20,7 @@ require __DIR__ . '/includes/utils.php';
 
 // Plugin functionality.
 require __DIR__ . '/includes/class-main.php';
+require __DIR__ . '/includes/class-custom-action.php';
 require __DIR__ . '/includes/class-delete-all.php';
 require __DIR__ . '/includes/class-delete-permanently.php';
 require __DIR__ . '/includes/class-edit.php';
