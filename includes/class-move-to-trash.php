@@ -75,34 +75,6 @@ class Move_To_Trash {
 	}
 
 	/**
-	 * Let the user know what's going on
-	 *
-	 * Not used for post-request redirect
-	 */
-	public static function admin_notices() {
-		$screen = get_current_screen();
-
-		$type    = '';
-		$message = '';
-
-		if ( 'edit' === $screen->base ) {
-			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
-				return;
-			}
-
-			$status  = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
-			$pending = Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, $status );
-
-			if ( ! empty( $pending ) ) {
-				$type    = 'warning';
-				$message = __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-actions-cron-offload' );
-			}
-		}
-
-		Main::render_admin_notice( $type, $message );
-	}
-
-	/**
 	 * Provide post-redirect success message
 	 *
 	 * @retun string
@@ -121,25 +93,12 @@ class Move_To_Trash {
 	}
 
 	/**
-	 * When a move is pending for a given post type, hide those posts in the admin
+	 * Provide translated message when posts are hidden pending move
 	 *
-	 * @param string $where Posts' WHERE clause.
-	 * @param object $q WP_Query object.
 	 * @return string
 	 */
-	public static function hide_posts( $where, $q ) {
-		if ( 'trash' === $q->get( 'post_status' ) ) {
-			return $where;
-		}
-
-		$post__not_in = Main::get_post_ids_for_pending_events( self::ACTION, $q->get( 'post_type' ), $q->get( 'post_status' ) );
-
-		if ( ! empty( $post__not_in ) ) {
-			$post__not_in = implode( ',', $post__not_in );
-			$where       .= ' AND ID NOT IN(' . $post__not_in . ')';
-		}
-
-		return $where;
+	public static function admin_notice_hidden_pending_processing() {
+		return __( 'Some items that would normally be shown here are waiting to be moved to the trash. These items are hidden until they are moved.', 'bulk-actions-cron-offload' );
 	}
 }
 

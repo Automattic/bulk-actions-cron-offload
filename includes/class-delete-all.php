@@ -120,7 +120,7 @@ class Delete_All {
 		if ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( Main::get_action_next_scheduled( self::ACTION, $screen->post_type ) ) {
 				$type    = 'warning';
-				$message = __( 'A pending request to empty the trash will be processed soon.', 'bulk-actions-cron-offload' );
+				$message = self::admin_notice_hidden_pending_processing();
 			}
 		}
 
@@ -143,6 +143,15 @@ class Delete_All {
 	 */
 	public static function admin_notice_error_message() {
 		return __( 'A request to empty the trash is already pending for this post type.', 'bulk-actions-cron-offload' );
+	}
+
+	/**
+	 * Provide translated message when posts are hidden pending processing
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_hidden_pending_processing() {
+		return __( 'A pending request to empty the trash will be processed soon.', 'bulk-actions-cron-offload' );
 	}
 
 	/**
