@@ -26,7 +26,7 @@ class Move_To_Trash {
 		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
-		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_pending_move' ), 999, 2 );
+		add_filter( 'posts_where', array( __CLASS__, 'hide_posts' ), 999, 2 );
 	}
 
 	/**
@@ -137,7 +137,7 @@ class Move_To_Trash {
 	 * @param object $q WP_Query object.
 	 * @return string
 	 */
-	public static function hide_posts_pending_move( $where, $q ) {
+	public static function hide_posts( $where, $q ) {
 		if ( ! is_admin() || ! $q->is_main_query() ) {
 			return $where;
 		}
