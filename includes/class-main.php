@@ -116,7 +116,7 @@ class Main {
 		$vars->current_screen = (object) $screen;
 		unset( $screen );
 
-		// Remainder of data comes from $_REQUEST
+		// Remainder of data comes from $_REQUEST.
 		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
 			$vars->action = 'delete_all';
 		} elseif ( isset( $_REQUEST['action'] ) && '-1' !== $_REQUEST['action'] ) {

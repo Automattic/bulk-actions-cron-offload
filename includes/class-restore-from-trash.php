@@ -117,7 +117,7 @@ class Restore_From_Trash {
 	 * @return string
 	 */
 	public static function admin_notice_hidden_pending_processing() {
-		return __( 'Some items that would normally be shown here are waiting to be restored from the trash. These items are hidden until they are restored.', 'bulk-actions-cron-offload' );;
+		return __( 'Some items that would normally be shown here are waiting to be restored from the trash. These items are hidden until they are restored.', 'bulk-actions-cron-offload' );
 	}
 
 	/**

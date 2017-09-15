@@ -45,7 +45,7 @@ class Custom_Action {
 		), $return_url );
 
 		// Run the custom action as Core does. See note above.
-		$return_url = apply_filters( 'handle_bulk_actions-' . $vars->current_screen->id, $return_url, $vars->action, $vars->posts );
+		$return_url = apply_filters( 'handle_bulk_actions-' . $vars->current_screen->id, $return_url, $vars->action, $vars->posts ); // Core violates its own standard by using a hyphen in the hook name. @codingStandardsIgnoreLine
 
 		// Can't get much more than this in terms of success or failure.
 		$results = compact( 'return_url', 'vars' );
