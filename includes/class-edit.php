@@ -35,9 +35,6 @@ class Edit {
 			return;
 		}
 
-		// We want to use `bulk_edit_posts()`.
-		require_once ABSPATH . '/wp-admin/includes/post.php';
-
 		// `bulk_edit_posts()` takes an array, normally `$_REQUEST`, so we convert back.
 		$request_array = get_object_vars( $vars );
 		unset( $request_array['action'] );

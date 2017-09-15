@@ -32,8 +32,6 @@ class Move_To_Trash {
 		$count = 0;
 
 		if ( is_array( $vars->posts ) && ! empty( $vars->posts ) ) {
-			require_once ABSPATH . '/wp-admin/includes/post.php';
-
 			$trashed    = array();
 			$locked     = array();
 			$auth_error = array();

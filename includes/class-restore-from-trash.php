@@ -32,8 +32,6 @@ class Restore_From_Trash {
 		$count = 0;
 
 		if ( is_array( $vars->posts ) && ! empty( $vars->posts ) ) {
-			require_once ABSPATH . '/wp-admin/includes/post.php';
-
 			$restored   = array();
 			$locked     = array();
 			$auth_error = array();

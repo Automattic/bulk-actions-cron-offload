@@ -48,6 +48,18 @@ trait Bulk_Actions {
 	}
 
 	/**
+	 * Prepare environment for individual actions
+	 *
+	 * @param object $vars Bulk-request variables.
+	 */
+	public static function process_via_cron( $vars ) {
+		// Normally processed in the admin context.
+		require_once( ABSPATH . 'wp-admin/includes/admin.php' );
+
+		parent::process_via_cron( $vars );
+	}
+
+	/**
 	 * Render the post-redirect notice, or hand off to class for other notices
 	 */
 	public static function render_admin_notices() {

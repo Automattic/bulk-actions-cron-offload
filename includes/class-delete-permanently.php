@@ -32,8 +32,6 @@ class Delete_Permanently {
 		$count = 0;
 
 		if ( is_array( $vars->posts ) && ! empty( $vars->posts ) ) {
-			require_once ABSPATH . '/wp-admin/includes/post.php';
-
 			$deleted    = array();
 			$locked     = array();
 			$auth_error = array();

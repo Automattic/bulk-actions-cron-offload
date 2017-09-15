@@ -64,8 +64,6 @@ class Delete_All {
 		$count = 0;
 
 		if ( is_array( $post_ids ) && ! empty( $post_ids ) ) {
-			require_once ABSPATH . '/wp-admin/includes/post.php';
-
 			$deleted    = array();
 			$locked     = array();
 			$auth_error = array();

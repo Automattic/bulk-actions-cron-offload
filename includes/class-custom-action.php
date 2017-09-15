@@ -33,9 +33,6 @@ class Custom_Action {
 	 * @param object $vars Bulk-request variables.
 	 */
 	public static function process_via_cron( $vars ) {
-		// Normally processed in the admin context.
-		require_once( ABSPATH . 'wp-admin/includes/admin.php' );
-
 		// Provide for capabilities checks.
 		wp_set_current_user( $vars->user_id );
 
@@ -50,7 +47,7 @@ class Custom_Action {
 		// Run the custom action as Core does. See note above.
 		$return_url = apply_filters( 'handle_bulk_actions-' . $vars->current_screen->id, $return_url, $vars->action, $vars->posts );
 
-		//
+		// Can't get much more than this in terms of success or failure.
 		$results = compact( 'return_url', 'vars' );
 		do_action( 'bulk_actions_cron_offload_custom_request_completed', $results, $vars );
 	}
