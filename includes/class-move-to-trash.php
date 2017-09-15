@@ -12,22 +12,16 @@ namespace Automattic\WP\Bulk_Actions_Cron_Offload;
  */
 class Move_To_Trash {
 	/**
+	 * Common hooks and such
+	 */
+	use Bulk_Actions;
+
+	/**
 	 * Class constants
 	 */
 	const ACTION = 'trash';
 
 	const ADMIN_NOTICE_KEY = 'bulk_actions_cron_offload_move_to_trash';
-
-	/**
-	 * Register this bulk process' hooks
-	 */
-	public static function register_hooks() {
-		add_action( Main::build_hook( self::ACTION ), array( __CLASS__, 'process' ) );
-		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
-
-		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
-		add_filter( 'posts_where', array( __CLASS__, 'hide_posts' ), 999, 2 );
-	}
 
 	/**
 	 * Handle a request to move some posts to the trash
