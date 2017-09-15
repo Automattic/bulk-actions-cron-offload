@@ -66,8 +66,8 @@ class Main {
 			return;
 		}
 
-		// Nothing to do.
-		if ( empty( $vars->posts ) ) {
+		// Nothing to do, unless we're emptying the trash.
+		if ( empty( $vars->posts ) && 'delete_all' !== $vars->action ) {
 			self::do_admin_redirect( self::ADMIN_NOTICE_KEY, false );
 		}
 
