@@ -32,8 +32,6 @@ class Restore_From_Trash {
 		$count = 0;
 
 		if ( is_array( $vars->posts ) && ! empty( $vars->posts ) ) {
-			require_once ABSPATH . '/wp-admin/includes/post.php';
-
 			$restored   = array();
 			$locked     = array();
 			$auth_error = array();
@@ -88,7 +86,7 @@ class Restore_From_Trash {
 		if ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, 'trash' ) ) {
 				$type    = 'warning';
-				$message = __( 'Some items that would normally be shown here are waiting to be restored from the trash. These items are hidden until they are restored.', 'bulk-actions-cron-offload' );
+				$message = self::admin_notice_hidden_pending_processing();
 			}
 		}
 
@@ -111,6 +109,15 @@ class Restore_From_Trash {
 	 */
 	public static function admin_notice_error_message() {
 		return __( 'The selected posts are already scheduled to be restored.', 'bulk-actions-cron-offload' );
+	}
+
+	/**
+	 * Provide translated message when posts are hidden pending restoration
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_hidden_pending_processing() {
+		return __( 'Some items that would normally be shown here are waiting to be restored from the trash. These items are hidden until they are restored.', 'bulk-actions-cron-offload' );
 	}
 
 	/**

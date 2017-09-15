@@ -32,8 +32,6 @@ class Delete_Permanently {
 		$count = 0;
 
 		if ( is_array( $vars->posts ) && ! empty( $vars->posts ) ) {
-			require_once ABSPATH . '/wp-admin/includes/post.php';
-
 			$deleted    = array();
 			$locked     = array();
 			$auth_error = array();
@@ -88,7 +86,7 @@ class Delete_Permanently {
 		if ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
 			if ( Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, 'trash' ) ) {
 				$type    = 'warning';
-				$message = __( 'Some items that would normally be shown here are waiting to be deleted permanently. These items are hidden until then.', 'bulk-actions-cron-offload' );
+				$message = self::admin_notice_hidden_pending_processing();
 			}
 		}
 
@@ -111,6 +109,15 @@ class Delete_Permanently {
 	 */
 	public static function admin_notice_error_message() {
 		return __( 'The selected posts are already scheduled to be deleted.', 'bulk-actions-cron-offload' );
+	}
+
+	/**
+	 * Provide translated message when posts are hidden pending processing
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_hidden_pending_processing() {
+		return __( 'Some items that would normally be shown here are waiting to be deleted permanently. These items are hidden until then.', 'bulk-actions-cron-offload' );
 	}
 
 	/**

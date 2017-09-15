@@ -19,7 +19,7 @@ trait Bulk_Actions {
 		add_action( Main::build_cron_hook( self::ACTION ), array( __CLASS__, 'process_via_cron' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'render_admin_notices' ) );
-		add_filter( 'posts_where', array( __CLASS__, 'hide_posts' ), 999, 2 );
+		add_filter( 'posts_where', array( __CLASS__, 'hide_posts_common' ), 999, 2 );
 
 		add_filter( 'removable_query_args', array( __CLASS__, 'remove_notice_arg' ) );
 
@@ -48,6 +48,18 @@ trait Bulk_Actions {
 	}
 
 	/**
+	 * Prepare environment for individual actions
+	 *
+	 * @param object $vars Bulk-request variables.
+	 */
+	public static function process_via_cron( $vars ) {
+		// Normally processed in the admin context.
+		require_once( ABSPATH . 'wp-admin/includes/admin.php' );
+
+		parent::process_via_cron( $vars );
+	}
+
+	/**
 	 * Render the post-redirect notice, or hand off to class for other notices
 	 */
 	public static function render_admin_notices() {
@@ -65,6 +77,34 @@ trait Bulk_Actions {
 		}
 
 		self::admin_notices();
+	}
+
+	/**
+	 * Let the user know what's going on
+	 *
+	 * Not used for post-request redirect
+	 */
+	public static function admin_notices() {
+		$screen = get_current_screen();
+
+		$type    = '';
+		$message = '';
+
+		if ( 'edit' === $screen->base ) {
+			if ( isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
+				return;
+			}
+
+			$status  = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
+			$pending = Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, $status );
+
+			if ( ! empty( $pending ) ) {
+				$type    = 'warning';
+				$message = self::admin_notice_hidden_pending_processing();
+			}
+		}
+
+		Main::render_admin_notice( $type, $message );
 	}
 
 	/**
@@ -86,13 +126,22 @@ trait Bulk_Actions {
 	}
 
 	/**
-	 * When an edit is pending for a given post type, hide those posts in the admin
+	 * Provide translated message when posts are hidden pending processing
+	 *
+	 * @return string
+	 */
+	public static function admin_notice_hidden_pending_processing() {
+		return '';
+	}
+
+	/**
+	 * When a process is pending for a given post type, hide those posts in the admin
 	 *
 	 * @param string $where Posts' WHERE clause.
 	 * @param object $q WP_Query object.
 	 * @return string
 	 */
-	public static function hide_posts( $where, $q ) {
+	public static function hide_posts_common( $where, $q ) {
 		if ( ! is_admin() || ! $q->is_main_query() ) {
 			return $where;
 		}
@@ -101,7 +150,29 @@ trait Bulk_Actions {
 			return $where;
 		}
 
-		return parent::hide_posts( $where, $q );
+		return self::hide_posts( $where, $q );
+	}
+
+	/**
+	 * Hide posts pending processing
+	 *
+	 * @param string $where Posts' WHERE clause.
+	 * @param object $q WP_Query object.
+	 * @return string
+	 */
+	public static function hide_posts( $where, $q ) {
+		if ( 'trash' === $q->get( 'post_status' ) ) {
+			return $where;
+		}
+
+		$post__not_in = Main::get_post_ids_for_pending_events( self::ACTION, $q->get( 'post_type' ), $q->get( 'post_status' ) );
+
+		if ( ! empty( $post__not_in ) ) {
+			$post__not_in = implode( ',', $post__not_in );
+			$where       .= ' AND ID NOT IN(' . $post__not_in . ')';
+		}
+
+		return $where;
 	}
 
 	/**
