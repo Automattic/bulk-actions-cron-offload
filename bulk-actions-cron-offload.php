@@ -15,6 +15,7 @@
 namespace Automattic\WP\Bulk_Actions_Cron_Offload;
 
 // Plugin dependencies.
+require __DIR__ . '/includes/trait-in-trash.php';
 require __DIR__ . '/includes/trait-remove-one-time-args.php';
 require __DIR__ . '/includes/trait-bulk-actions.php';
 require __DIR__ . '/includes/utils.php';

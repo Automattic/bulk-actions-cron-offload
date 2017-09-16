@@ -14,7 +14,10 @@ class Delete_Permanently {
 	/**
 	 * Common hooks and such
 	 */
-	use Bulk_Actions;
+	use Bulk_Actions, In_Trash {
+		In_Trash::admin_notices insteadof Bulk_Actions;
+		In_Trash::hide_posts insteadof Bulk_Actions;
+	}
 
 	/**
 	 * Class constants
@@ -73,27 +76,6 @@ class Delete_Permanently {
 	}
 
 	/**
-	 * Let the user know what's going on
-	 *
-	 * Not used for post-request redirect
-	 */
-	public static function admin_notices() {
-		$screen = get_current_screen();
-
-		$type    = '';
-		$message = '';
-
-		if ( 'edit' === $screen->base && isset( $_REQUEST['post_status'] ) && 'trash' === $_REQUEST['post_status'] ) {
-			if ( Main::get_post_ids_for_pending_events( self::ACTION, $screen->post_type, 'trash' ) ) {
-				$type    = 'warning';
-				$message = self::admin_notice_hidden_pending_processing();
-			}
-		}
-
-		Main::render_admin_notice( $type, $message );
-	}
-
-	/**
 	 * Provide post-redirect success message
 	 *
 	 * @retun string
@@ -118,28 +100,6 @@ class Delete_Permanently {
 	 */
 	public static function admin_notice_hidden_pending_processing() {
 		return __( 'Some items that would normally be shown here are waiting to be deleted permanently. These items are hidden until then.', 'bulk-actions-cron-offload' );
-	}
-
-	/**
-	 * When a delete is pending for a given post type, hide those posts in the admin
-	 *
-	 * @param string $where Posts' WHERE clause.
-	 * @param object $q WP_Query object.
-	 * @return string
-	 */
-	public static function hide_posts( $where, $q ) {
-		if ( 'trash' !== $q->get( 'post_status' ) ) {
-			return $where;
-		}
-
-		$post__not_in = Main::get_post_ids_for_pending_events( self::ACTION, $q->get( 'post_type' ), $q->get( 'post_status' ) );
-
-		if ( ! empty( $post__not_in ) ) {
-			$post__not_in = implode( ',', $post__not_in );
-			$where       .= ' AND ID NOT IN(' . $post__not_in . ')';
-		}
-
-		return $where;
 	}
 }
 
