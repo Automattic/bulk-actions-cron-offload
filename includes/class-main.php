@@ -12,6 +12,11 @@ namespace Automattic\WP\Bulk_Actions_Cron_Offload;
  */
 class Main {
 	/**
+	 * Strip notice arguments after the initial redirect
+	 */
+	use Remove_One_Time_Args;
+
+	/**
 	 * Prefix for bulk-process hook invoked by request-specific classes
 	 */
 	const ACTION = 'bulk_actions_cron_offload_';
@@ -36,6 +41,7 @@ class Main {
 		add_action( 'load-edit.php', array( __CLASS__, 'intercept' ) );
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
+		add_filter( 'removable_query_args', array( __CLASS__, 'remove_notice_arg' ) );
 	}
 
 	/**
