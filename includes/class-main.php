@@ -99,7 +99,15 @@ class Main {
 	 * Capture relevant variables
 	 */
 	private static function capture_vars() {
-		$vars = array( 'action', 'custom_action', 'user_id', 'current_screen' ); // Extra data that normally would be available from the context.
+		// Extra data that normally would be available from the request.
+		$vars = array(
+			'action',         // Bulk action, or "custom" when not from Core.
+			'custom_action',  // Name of custom action.
+			'user_id',        // For permissions checks.
+			'current_screen', // Public properties from \WP_Screen.
+			'raw_request',    // When using a custom action, $_REQUEST.
+		);
+
 		$vars = array_merge( $vars, self::get_supported_vars() );
 		$vars = (object) array_fill_keys( $vars, null );
 
@@ -187,10 +195,11 @@ class Main {
 			$vars->keep_private = true;
 		}
 
-		// Standardize custom actions.
+		// Standardize custom actions and capture extra data.
 		if ( ! self::is_core_action( $vars->action ) ) {
 			$vars->custom_action = $vars->action;
 			$vars->action        = 'custom';
+			$vars->raw_request   = $_REQUEST;
 		}
 
 		return $vars;
@@ -228,11 +237,11 @@ class Main {
 	 */
 	public static function is_core_action( $action ) {
 		$core_actions = array(
-			'delete', // class Delete_Permanently.
+			'delete',     // class Delete_Permanently.
 			'delete_all', // class Delete_All.
-			'edit', // class Edit.
-			'trash', // class Move_To_Trash.
-			'untrash', // class Restore_From_Trash.
+			'edit',       // class Edit.
+			'trash',      // class Move_To_Trash.
+			'untrash',    // class Restore_From_Trash.
 		);
 
 		return in_array( $action, $core_actions, true );

@@ -36,16 +36,28 @@ class Custom_Action {
 		// Provide for capabilities checks.
 		wp_set_current_user( $vars->user_id );
 
-		// TODO: capture and repopulate $_REQUEST?
-		// Rebuild something akin to the URL this would normally be filtering.
+		// Rebuild something akin to the URL the custom action would normally be filtering.
 		$return_url = sprintf( '/wp-admin/%1$s.php', $vars->current_screen->base );
 		$return_url = add_query_arg( array(
 			'post_type'   => $vars->post_type,
 			'post_status' => $vars->post_status,
 		), $return_url );
 
+		// Because custom actions could be accessing $_REQUEST directly.
+		if ( ! is_null( $vars->raw_request ) ) {
+			global $real_request;
+			$real_request = $_REQUEST;
+
+			$_REQUEST = $vars->raw_request;
+		}
+
 		// Run the custom action as Core does. See note above.
 		$return_url = apply_filters( 'handle_bulk_actions-' . $vars->current_screen->id, $return_url, $vars->action, $vars->posts ); // Core violates its own standard by using a hyphen in the hook name. @codingStandardsIgnoreLine
+
+		// If $_REQUEST was overwritten, restore the original.
+		if ( isset( $real_request ) ) {
+			$_REQUEST = $real_request;
+		}
 
 		// Can't get much more than this in terms of success or failure.
 		$results = compact( 'return_url', 'vars' );
