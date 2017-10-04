@@ -14,7 +14,7 @@ class Delete_Permanently {
 	/**
 	 * Common hooks and such
 	 */
-	use Bulk_Actions, In_Trash {
+	use Bulk_Actions , In_Trash {
 		In_Trash::admin_notices insteadof Bulk_Actions;
 		In_Trash::hide_posts insteadof Bulk_Actions;
 	}
