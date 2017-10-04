@@ -2,7 +2,7 @@
 /**
  * PHPUnit bootstrap file
  *
- * @package Bulk_Edit_Cron_Offload
+ * @package Bulk_Actions_Cron_Offload
  */
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
@@ -17,7 +17,7 @@ require_once $_tests_dir . '/includes/functions.php';
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	require dirname( dirname( __FILE__ ) ) . '/bulk-edit-cron-offload.php';
+	require dirname( dirname( __FILE__ ) ) . '/bulk-actions-cron-offload.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
